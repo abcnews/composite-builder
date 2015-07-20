@@ -1,0 +1,25 @@
+default:
+ - 'dev'
+ - 'connect:dev'
+ - 'watch'
+
+dev:
+ - 'clean'
+ - 'jshint:js'
+ - 'browserify:dev'
+ - 'concat:vendorjs'
+ - 'compass:dev'
+ - 'copy:static'
+
+prod:
+ - 'clean'
+ - 'jshint:js'
+ - 'browserify:prod'
+ - 'uglify:prod'
+ - 'concat:vendorjs'
+ - 'compass:prod'
+ - 'version'
+ - 'copy:static'
+
+apps:
+ - 'nodewebkit'

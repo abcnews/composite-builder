@@ -1,0 +1,17 @@
+@media print {
+    .Composite {
+        margin: 0;
+        box-shadow: none;
+    }
+
+    .Composite-image:empty::before,
+    .Composite-branding:empty::before {
+        content: "";
+    }
+
+    .Composite-textResizeHandle,
+    .Controls,
+    .Download {
+        display: none;
+    }
+}

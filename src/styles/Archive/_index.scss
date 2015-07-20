@@ -1,0 +1,15 @@
+$compositeMargin: 20px;
+
+@import './keyframes';
+
+body {
+	margin: 0 auto;
+	max-width: $compositeWidth + $compositeMargin * 2;
+}
+
+.Archive {
+	margin: $compositeMargin;
+	transition: background-color 0.5s;
+}
+
+@import './ArchivedComposite';
