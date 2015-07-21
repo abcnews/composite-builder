@@ -1,6 +1,6 @@
 #composite-builder
 
-A tool for building compositetional graphics for use on social media.
+A tool for building composite graphics for use on social media.
 
 ## Dependencies
 
