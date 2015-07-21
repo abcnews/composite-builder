@@ -1,8 +1,8 @@
 module.exports = {
-	nucpnoutil01: {
+	newsdev3: {
 		credentials: ".abc-credentials",
-		targetName: "nucpnoutil01",
-		target: "/opt/newsdev/news-projects/root/composite-builder/",
+		targetName: "newsdev3",
+		target: "/var/www/html/tools/composite-builder/",
 		files: [{
 			expand: true,
 			cwd: 'build/',

@@ -112,9 +112,7 @@
 
 .Composite-partitionMoveHandle {
     display: block;
-    position: absolute;
-    top: 0;
-    bottom: 0;
+    right: auto;
     margin-left: -1em;
     width: 2em;
     opacity: 0;
@@ -123,6 +121,7 @@
     background-position: center center;
     background-repeat: no-repeat;
     cursor: move;
+    cursor: col-resize;
 }
 
 .Composite:first-of-type .Composite-partitionMoveHandle {
@@ -138,9 +137,11 @@
 .Composite-partitionMoveHandle:after {
     content: attr(title);
     position: absolute;
+    right: 0;
+    left: 0;
     bottom: 0.5em;
-    width: 2em;
     color: #fff;
+    font-size: 85%;
     text-align: center;
 }
 
