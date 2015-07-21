@@ -19,7 +19,7 @@
 .Controls label {
     font-size: 1.25em;
     padding-right: 1.25%;
-    width: 10%;
+    width: 20%;
     line-height: 30px;
     text-align: right;
 }
@@ -69,23 +69,8 @@
     font-size: 1.25em;
 }
 
-.Controls input[type=text].Controls-text {
-    position: relative;
-    width: 90%;
-    z-index: 2;
-}
-
-.Controls input[type=text].Controls-textSource {
-    width: 30%;
-}
-
-.Controls button.Controls-align {
-    position: relative;
-    width: 10%;
-}
-
 .Controls input[type=text].Controls-imageSource {
-    width: 30%;
+    width: 40%;
 }
 
 .no-object-fit .Controls input[type=text].Controls-imageSource {
@@ -100,27 +85,12 @@
     background-color: $red;
 }
 
-.Controls select.Controls-presetBranding {
-    position: relative;
-    margin-right: 5%;
-    width: 15%;
-}
-
-.Controls button.Controls-tintIndex {
-    width: 5%;
-}
-
-.Controls label[for=imageScale] {
-    margin-left: 30%;
-    width: 15%;
-}
-
-.Controls button.Controls-tintIndex + label[for=imageScale] {
-    margin-left: 5%;
-}
-
 .Controls input.Controls-imageScale {
-    width: 15%;
+    width: 20%;
+}
+
+.Controls label[for=isSquared] {
+    margin-left: 60%;
 }
 
 .Controls-info {

@@ -4,8 +4,7 @@
         box-shadow: none;
     }
 
-    .Composite-image:empty::before,
-    .Composite-branding:empty::before {
+    .Composite-image:empty::before {
         content: "";
     }
 

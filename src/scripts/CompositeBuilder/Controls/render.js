@@ -1,94 +1,71 @@
 var h = require('mercury').h;
 var hg = require('mercury');
 
-var branding = require('../branding');
-
-var BRANDING_OPTIONS = [].concat.apply(['Custom'], Object.keys(branding));
-var TICK = '✔';
-
 module.exports = render;
 
-function render(state, parentChannels) {
+function render(state) {
     var propsChange = state.channels.propsChange;
 
     return h('div.Controls', [
 
-        // Hidden: Image URL / Custom Branding URL
+        // Hidden: Image URLs
 
-        h('input.Controls-imageURL', {
+        h('input.Controls-imageURL.Controls-imageAURL', {
             type: 'file',
-            'ev-event': hg.sendChange(state.channels.imagePick)
+            'ev-event': hg.sendChange(state.channels.imageAPick)
         }),
-        h('input.Controls-customBrandingURL', {
+
+        h('input.Controls-imageURL.Controls-imageBURL', {
             type: 'file',
-            'ev-event': hg.sendChange(state.channels.brandingPick)
+            'ev-event': hg.sendChange(state.channels.imageBPick)
         }),
 
-        // Row 1: Text
+        // Row 1: Image A (Credit + Scale)
 
-        h('label', {
-            htmlFor: 'text',
-            'ev-click': hg.send(parentChannels.textLabelClick)
-        }, 'Text'),
-        h('input.Controls-text', {
-            name: 'text',
-            type: 'text',
-            value: state.text,
-            'ev-event': hg.sendChange(propsChange)
-        }),
-
-        // Row 2: Source / Alignment 
-
-        h('label', {htmlFor: 'textSource'}, 'Source'),
-        h('input.Controls-textSource', {
-            name: 'textSource',
-            type: 'text',
-            disabled: !state.text.length,
-            value: state.textSource,
-            'ev-event': hg.sendChange(propsChange)
-        }),
-        h('label', 'Align'),
-        h('button.Controls-align.Controls-align--left', {
-            disabled: state.textAlign === 'left',
-            'ev-click': hg.send(propsChange, {textAlign: 'left'})
-        }, 'Left'),
-        h('button.Controls-align.Controls-align--right', {
-            disabled: state.textAlign === 'right',
-            'ev-click': hg.send(propsChange, {textAlign: 'right'})
-        }, 'Right'),
-        h('button.Controls-align.Controls-align--centre', {
-            disabled: state.textAlign === 'centre',
-            'ev-click': hg.send(propsChange, {textAlign: 'centre'})
-        }, 'Centre'),
-        h('button.Controls-align.Controls-align--top', {
-            disabled: state.textAlign === 'top',
-            'ev-click': hg.send(propsChange, {textAlign: 'top'})
-        }, 'Top'),
-        h('button.Controls-align.Controls-align--bottom', {
-            disabled: state.textAlign === 'bottom',
-            'ev-click': hg.send(propsChange, {textAlign: 'bottom'})
-        }, 'Bottom'),
-
-        // Row 3: Image Credit / Branding / Square Toggle
-
-        h('label', {htmlFor: 'imageSource'}, 'Credit'),
+        h('label', {htmlFor: 'imageASource'}, 'Left Image Credit'),
         h('input.Controls-imageSource', {
-            name: 'imageSource',
+            name: 'imageASource',
             type: 'text',
-            disabled: !state.imageURL.length,
-            value: state.imageSource,
+            disabled: !state.imageAURL.length,
+            value: state.imageASource,
             'ev-event': hg.sendChange(propsChange)
         }),
-        h('label', {htmlFor: 'presetBranding'}, 'Brand'),
-        h('select.Controls-presetBranding', {
-            name: 'presetBranding',
-            value: state.presetBranding,
+        h('label', {htmlFor: 'imageAScale'}, 'Left Image Scale'),
+        h('input.Controls-imageScale', {
+            name: 'imageAScale',
+            type: 'range',
+            min: state.imageAMinScale.toFixed(2),
+            max: state.imageAMinScale.toFixed(2) * 2,
+            step: (state.imageAMinScale / 10).toFixed(3),
+            value: state.imageAScale,
+            disabled: !state.imageAURL.length,
+            'ev-event': hg.sendChange(state.channels.imageScaleRangeChange)
+        }),
+
+        // Row 2: Image B (Credit + Scale)
+
+        h('label', {htmlFor: 'imageBSource'}, 'Right Image Credit'),
+        h('input.Controls-imageSource', {
+            name: 'imageBSource',
+            type: 'text',
+            disabled: !state.imageBURL.length,
+            value: state.imageBSource,
             'ev-event': hg.sendChange(propsChange)
-        }, BRANDING_OPTIONS.map(function (name) {
-            return h('option', {
-                value: branding[name] ? name : ''
-            }, name);
-        })),
+        }),
+        h('label', {htmlFor: 'imageBScale'}, 'Right Image Scale'),
+        h('input.Controls-imageScale', {
+            name: 'imageBScale',
+            type: 'range',
+            min: state.imageBMinScale.toFixed(2),
+            max: state.imageBMinScale.toFixed(2) * 2,
+            step: (state.imageBMinScale / 10).toFixed(3),
+            value: state.imageBScale,
+            disabled: !state.imageBURL.length,
+            'ev-event': hg.sendChange(state.channels.imageScaleRangeChange)
+        }),
+
+        // Row 3: Square Toggle
+
         h('label', {htmlFor: 'isSquared'}, 'Squared'),
         h('button.Controls-isSquared.Controls-isSquared--yes', {
             disabled: state.isSquared,
@@ -99,50 +76,7 @@ function render(state, parentChannels) {
             'ev-click': hg.send(propsChange, {isSquared: false})
         }, 'No'),
 
-        // Row 4: Overlay Theme / (Overlay Tint) / Image Scale
-
-        h('label', {htmlFor: 'theme'}, 'Overlay'),
-        h('button.Controls-theme.Controls-theme--tinted', {
-            disabled: state.theme === 'tinted',
-            'ev-click': hg.send(propsChange, {theme: 'tinted'})
-        }, 'Tinted'),
-        h('button.Controls-theme.Controls-theme--dark', {
-            disabled: state.theme === 'dark',
-            'ev-click': hg.send(propsChange, {theme: 'dark'})
-        }, 'Dark'),
-        h('button.Controls-theme.Controls-theme--light', {
-            disabled: state.theme === 'light',
-            'ev-click': hg.send(propsChange, {theme: 'light'})
-        }, 'Light'),
-        (state.theme === 'tinted' && state.tintPalette.length ? h('label', {htmlFor: 'tintIndex'}, 'Tint') : null),
-        (state.theme === 'tinted' && state.tintPalette.length ? h('button.Controls-tintIndex', {
-            disabled: state.tintIndex === 0,
-            style: { 'background-color': state.tintPalette[0] },
-            'ev-click': hg.send(propsChange, {tintIndex: 0})
-        }, state.tintIndex === 0 ? TICK : '') : null),
-        (state.theme === 'tinted' && state.tintPalette.length ? h('button.Controls-tintIndex', {
-            disabled: state.tintIndex === 1,
-            style: { 'background-color': state.tintPalette[1] },
-            'ev-click': hg.send(propsChange, {tintIndex: 1})
-        }, state.tintIndex === 1 ? TICK : '') : null),
-        (state.theme === 'tinted' && state.tintPalette.length ? h('button.Controls-tintIndex', {
-            disabled: state.tintIndex === 2,
-            style: { 'background-color': state.tintPalette[2] },
-            'ev-click': hg.send(propsChange, {tintIndex: 2})
-        }, state.tintIndex === 2 ? TICK : '') : null),
-        h('label', {htmlFor: 'imageScale'}, 'Image Scale'),
-        h('input.Controls-imageScale', {
-            name: 'imageScale',
-            type: 'range',
-            min: state.imageMinScale.toFixed(2),
-            max: state.imageMinScale.toFixed(2) * 2,
-            step: (state.imageMinScale / 10).toFixed(3),
-            value: state.imageScale,
-            disabled: !state.imageURL.length,
-            'ev-event': hg.sendChange(state.channels.imageScaleRangeChange)
-        }),
-
-        // Row 5: Info / FAQ Toggle / Feedback Email Link
+        // Row 4: Info / FAQ Toggle / Feedback Email Link
 
         h('span.Controls-info', [
             h('strong', 'Remember: '),

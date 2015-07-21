@@ -15,10 +15,8 @@ function CompositeBuilder(db) {
         composite: Composite(isModifierHeldDown),
         isModifierHeldDown: isModifierHeldDown,
         isExporting: hg.value(false),
-        isExploded: hg.value(false),
         channels: {
-            exportLinkClick: exportComposite.bind(null, db),
-            textLabelClick: toggleIsExploded
+            exportLinkClick: exportComposite.bind(null, db)
         }
     });
 
@@ -69,10 +67,6 @@ function archiveComposite(db, state, imageURL) {
             dbComposite.update({imageKey: dbImage.key()});
         });
     });
-}
-
-function toggleIsExploded(state) {
-    state.isExploded.set(!state.isExploded());
 }
 
 function setupKeyboardEvents(state) {

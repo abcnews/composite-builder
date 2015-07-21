@@ -11,8 +11,7 @@ module.exports = render;
 function render(state) {
     var classChain = '.CompositeBuilder' + util.classChain({
         'is-modifierHeldDown': state.isModifierHeldDown,
-        'is-exporting': state.isExporting,
-        'is-exploded': state.isExploded
+        'is-exporting': state.isExporting
     });
 
     return h('div#CompositeBuilder--' + state.id + classChain, [

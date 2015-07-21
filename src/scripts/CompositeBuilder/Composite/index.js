@@ -1,7 +1,6 @@
 var hg = require('mercury');
 var img = require('img');
 var observify = require('observify');
-var raf = require('raf');
 
 var render = require('./render');
 var util = require('../util');
@@ -9,29 +8,31 @@ var util = require('../util');
 module.exports = Composite;
 
 var STATE_DEFAULTS = {
-    imageURL: '',
-    imageSource: '',
-    imageDimensions: {width: 0, height: 0},
-    imageOffset: {x: 0, y: 0},
-    imageMinScale: 1,
-    imageScale: 1,
-    isImageContained: false,
+
+    imageAURL: '',
+    imageASource: '',
+    imageADimensions: {width: 0, height: 0},
+    imageAOffset: {x: 0, y: 0},
+    imageAMinScale: 1,
+    imageAScale: 1,
+
+    imageBURL: '',
+    imageBSource: '',
+    imageBDimensions: {width: 0, height: 0},
+    imageBOffset: {x: 0, y: 0},
+    imageBMinScale: 1,
+    imageBScale: 1,
+
+    partitionPct: 50,
+
     isSquared: false,
-    theme: 'tinted',
-    tintIndex: 0,
-    tintPalette: [],
-    text: '',
-    textSource: '',
-    textAlign: 'left',
-    textWidthPct: 40,
-    textHeightPct: 40,
-    blurClip: 'rect(0,0,0,0)',
-    presetBranding: '',
-    customBrandingURL: '',
     isDroppable: false,
     isFAQVisible: false,
+
     channels: null
 };
+
+var MIN_PARTITION_PCT = 25;
 
 function Composite(isModifierHeldDownState) {
     var state = observify(STATE_DEFAULTS);
@@ -41,10 +42,10 @@ function Composite(isModifierHeldDownState) {
     	imageScaleRangeChange: onChangeImageScaleRange,
     	dragover: enableDrop,
     	dragleave: disableDrop,
-    	imageDrop: dropHandler('imageURL'),
-    	brandingDrop: dropHandler('customBrandingURL'),
-    	imagePick: filePickerHandler('imageURL'),
-    	brandingPick: filePickerHandler('customBrandingURL')
+        imageADrop: dropHandler('imageAURL'),
+    	imageBDrop: dropHandler('imageBURL'),
+        imageAPick: filePickerHandler('imageAURL'),
+    	imageBPick: filePickerHandler('imageBURL')
     }, state));
 
     setupInternalUpdates(state);
@@ -56,126 +57,58 @@ function Composite(isModifierHeldDownState) {
 Composite.render = render;
 
 Composite.canExport = function (state) {
-    return !state.composite.isFAQVisible && (state.composite.imageURL || state.composite.text);
+    return !state.composite.isFAQVisible && state.composite.imageAURL && state.composite.imageBURL;
 };
 
 function setupInternalUpdates(state) {
 
-    // When the image URL changes:
+    // When an image URL changes:
     // * reset the offset & scale
     // * set the new image orientation
-    // * grab a new tint palette
-    state.imageURL(function (imageURL) {
+    state.imageAURL(function (imageURL) {
         img(imageURL, function (err, image) {
             if (err) {
-                resetProp(state, 'tintIndex');
-                resetProp(state, 'tintPalette');
                 return;
             }
 
-            resetProp(state, 'imageOffset');
-            resetProp(state, 'imageScale');
-            state.imageDimensions.set({width: image.naturalWidth, height: image.naturalHeight});
-            constrainImage(state);
-            state.imageScale.set(state.imageMinScale());
+            resetProp(state, 'imageAOffset');
+            resetProp(state, 'imageAScale');
+            state.imageADimensions.set({width: image.naturalWidth, height: image.naturalHeight});
+            constrainImageA(state);
+            state.imageAScale.set(state.imageAMinScale());
+        });
+        
+    });
+    state.imageBURL(function (imageURL) {
+        img(imageURL, function (err, image) {
+            if (err) {
+                return;
+            }
 
-            util.getTintPalette(image, function (palette) {
-                resetProp(state, 'tintIndex');
-                state.tintPalette.set(palette);
-            });
+            resetProp(state, 'imageBOffset');
+            resetProp(state, 'imageBScale');
+            state.imageBDimensions.set({width: image.naturalWidth, height: image.naturalHeight});
+            constrainImageB(state);
+            state.imageBScale.set(state.imageBMinScale());
         });
         
     });
 
-    // When the image's minimum scale changes, update its current scale
-    state.imageMinScale(function (minScale) {
-        state.imageScale.set(Math.max(state.imageScale(), minScale));
+    // When an image's minimum scale changes, update its current scale
+    state.imageAMinScale(function (minScale) {
+        state.imageAScale.set(Math.max(state.imageAScale(), minScale));
+    });
+    state.imageBMinScale(function (minScale) {
+        state.imageBScale.set(Math.max(state.imageBScale(), minScale));
     });
 
-    // When the composite dimensions change, re-constrain the image
+    // When the composite dimensions change, re-constrain the images
     state.isSquared(function () {
         setTimeout(function () {
-            constrainImage(state);
+            constrainImageA(state);
+            constrainImageB(state);
         }, 250);
     });
-
-    // When a custom branding image URL exists, reset the currently chosen preset
-    state.customBrandingURL(function () {
-        resetProp(state, 'presetBranding');
-    });
-
-    // When any of the blur clip-impacting property changes, update it
-    // (ensuring the (un-)squaring animation has completed when appropriate)
-    var blurImpactingProps = ['text', 'textSource', 'textAlign', 'textWidthPct', 'textHeightPct', 'isSquared'];
-    var boundUpdateBlurClip = updateBlurClip.bind(null, state);
-    var rafUpdateBlurClipHandle = null;
-    var rafUpdateBlurClip = function () {
-        if (rafUpdateBlurClipHandle) { raf.cancel(rafUpdateBlurClipHandle); }
-
-        rafUpdateBlurClipHandle = raf(boundUpdateBlurClip);
-    };
-    blurImpactingProps.map(function (propName) {
-        if (propName === 'isSquared') {
-            state[propName](function () {
-                resetProp(state, 'blurClip');
-                setTimeout(boundUpdateBlurClip, 300);
-            });
-        } else {
-            state[propName](rafUpdateBlurClip);
-        }
-    });
-
-}
-
-function updateBlurClip(state) {
-    var composite = document.querySelector('.Composite');
-    var blockquote = document.querySelector('.Composite-text blockquote');
-
-    if (!composite || !blockquote) { return; }
-
-    var compositeStyle = window.getComputedStyle(composite);
-    var compositeWidth = +compositeStyle.width.replace('px', '');
-    var compositeHeight = +compositeStyle.height.replace('px', '');
-    var blockquoteStyle = window.getComputedStyle(blockquote);
-    var blockquoteWidth = +blockquoteStyle.width.replace('px', '');
-    var blockquoteHeight = +blockquoteStyle.height.replace('px', '');
-    var clipLeft = 0;
-    var clipRight = compositeWidth;
-    var clipTop = 0;
-    var clipBottom = compositeHeight;
-    var textAlign = state.textAlign();
-    var isSquared = state.isSquared();
-
-    switch (textAlign) {
-        case 'left':
-            clipRight = blockquoteWidth;
-            break;
-        case 'right':
-            clipLeft = compositeWidth - blockquoteWidth;
-            break;
-        case 'top':
-            clipBottom = blockquoteHeight;
-            clipLeft = isSquared ? clipLeft : (compositeWidth - blockquoteWidth) / 2;
-            clipRight = clipLeft + blockquoteWidth;
-            break;
-        case 'bottom':
-            clipTop = compositeHeight - blockquoteHeight;
-            clipLeft = isSquared ? clipLeft : (compositeWidth - blockquoteWidth) / 2;
-            clipRight = clipLeft + blockquoteWidth;
-            break;
-        case 'centre':
-            clipLeft = (compositeWidth - blockquoteWidth) / 2;
-            clipRight = clipLeft + blockquoteWidth;
-            clipTop = (compositeHeight - blockquoteHeight) / 2;
-            clipBottom = clipTop + blockquoteHeight;
-            break;
-        default:
-            break;
-    }
-
-    var blurClip ='rect(' + clipTop + 'px, ' + clipRight + 'px, ' + clipBottom + 'px, ' + clipLeft +'px)';
-
-    state.blurClip.set(blurClip);
 }
 
 function disableDrop(state) {
@@ -206,8 +139,6 @@ function dropHandler(propName) {
             } else {
                 window.alert('Web images can only be dropped directly from www.abc.net.au');
             }
-        } else if (data.text) {
-            state.text.set(data.text);
         }
 
         state.isDroppable.set(false);
@@ -237,121 +168,135 @@ function imageUpdater(propName) {
 }
 
 function onChangeImageScaleRange(state, data) {
-    state.imageScale.set(data.imageScale);
-    constrainImage(state);
+    if ('imageAScale' in data) {
+        state.imageAScale.set(data.imageAScale);
+        constrainImageA(state);
+    }
+
+    if ('imageBScale' in data) {
+        state.imageBScale.set(data.imageBScale);
+        constrainImageB(state);
+    }
 }
 
-var DRAG_KILL = {
-    onmove: function (event) {
-        event.preventDefault();
-    }
-};
-
 function setupPointerInteractions(state, isModifierHeldDownState) {
-    interact('.Composite-textResizeHandle').draggable({
+    interact('.Composite-partitionMoveHandle').draggable({
         onmove: function (event) {
-            var textAlign = state.textAlign();
-
-            if (textAlign === 'left' || textAlign === 'right') {
-                resizeTextWidth(state, event.dx);
-            } else {
-                resizeTextHeight(state, event.dy);
-            }
+            movePartition(state, event.dx);
+            constrainImageA(state);
+            constrainImageB(state);
 
             event.preventDefault();
         }
     });
 
-    interact('.Composite-text blockquote').draggable(DRAG_KILL);
-
-    interact('.Composite-text branding').draggable(DRAG_KILL);
-
-    interact('.Composite').draggable({
+    interact('.Composite-image--a').draggable({
         onmove: function (event) {
             var imageOffset, imageScale, imageMinScale;
 
-            imageOffset = state.imageOffset();
-            imageScale = state.imageScale();
-            imageMinScale = state.imageMinScale();
+            imageOffset = state.imageAOffset();
+            imageScale = state.imageAScale();
+            imageMinScale = state.imageAMinScale();
 
             if (isModifierHeldDownState()) {
-                state.imageScale.set(util.limitedNum(imageScale + event.dy * 0.005, imageMinScale, imageMinScale * 2));
+                state.imageAScale.set(util.limitedNum(imageScale + event.dy * 0.005, imageMinScale, imageMinScale * 2));
             } else {
-                state.imageOffset.set({
+                state.imageAOffset.set({
                     x: imageOffset.x + event.dx,
                     y: imageOffset.y + event.dy
                 });
             }
 
-            constrainImage(state);
+            constrainImageA(state);
 
             event.preventDefault();
         }
     });
 
-    interact('.Composite').on('doubletap', function (event) {
-        document.querySelector('.Controls-imageURL').click();
-        event.preventDefault();
-    });
+    interact('.Composite-image--b').draggable({
+        onmove: function (event) {
+            var imageOffset, imageScale, imageMinScale;
 
-    interact('.Composite-branding img, .Composite-brandingPlaceholder').on('doubletap', function (event) {
-        document.querySelector('.Controls-customBrandingURL').click();
-        event.preventDefault();
-        event.stopPropagation();
-    });
+            imageOffset = state.imageBOffset();
+            imageScale = state.imageBScale();
+            imageMinScale = state.imageBMinScale();
 
-    interact('.Composite-branding img, .Composite-brandingPlaceholder').on('tap', function (event) {
-        if (isModifierHeldDownState()) {
-            if ('URL' in window && 'createObjectURL' in window.URL) {
-                window.URL.revokeObjectURL(state.customBrandingURL());
+            if (isModifierHeldDownState()) {
+                state.imageBScale.set(util.limitedNum(imageScale + event.dy * 0.005, imageMinScale, imageMinScale * 2));
+            } else {
+                state.imageBOffset.set({
+                    x: imageOffset.x + event.dx,
+                    y: imageOffset.y + event.dy
+                });
             }
 
-            document.querySelector('.Controls-customBrandingURL').value = null;
-            resetProp(state, 'customBrandingURL');
-        }
+            constrainImageB(state);
 
+            event.preventDefault();
+        }
+    });
+
+    interact('.Composite-image--a').on('doubletap', function (event) {
+        document.querySelector('.Controls-imageAURL').click();
         event.preventDefault();
-        event.stopPropagation();
+    });
+
+    interact('.Composite-image--b').on('doubletap', function (event) {
+        document.querySelector('.Controls-imageBURL').click();
+        event.preventDefault();
     });
 }
 
-function constrainImage(state) {
+function constrainImageA(state) {
     var composite = document.querySelector('.Composite');
     var compositeStyle = window.getComputedStyle(composite);
     var compositeWidth = +compositeStyle.width.replace('px', '');
+    var panelWidth = compositeWidth / 100 * state.partitionPct();
     var compositeHeight = +compositeStyle.height.replace('px', '');
-    var imageDimensions = state.imageDimensions();
-    var imageOffset = state.imageOffset();
+    var imageDimensions = state.imageADimensions();
+    var imageOffset = state.imageAOffset();
     var imageScale;
 
-    // Image should never be smaller than composite (this will update the current scale too, if required)
-    state.imageMinScale.set(1 / Math.min(imageDimensions.width / compositeWidth, imageDimensions.height / compositeHeight));
+    // Image should never be smaller than panel (this will update the current scale too, if required)
+    state.imageAMinScale.set(1 / Math.min(imageDimensions.width / panelWidth, imageDimensions.height / compositeHeight));
 
-    imageScale = state.imageScale();
+    imageScale = state.imageAScale();
 
     // Image should never be offset inside the composite
-    state.imageOffset.set({
-        x: util.limitedNum(imageOffset.x, 0.5 * (compositeWidth - imageDimensions.width * imageScale), 0.5 * (imageDimensions.width * imageScale - compositeWidth)),
+    state.imageAOffset.set({
+        x: util.limitedNum(imageOffset.x, 0.5 * (panelWidth - imageDimensions.width * imageScale), 0.5 * (imageDimensions.width * imageScale - panelWidth)),
         y: util.limitedNum(imageOffset.y, 0.5 * (compositeHeight - imageDimensions.height * imageScale), 0.5 * (imageDimensions.height * imageScale - compositeHeight))
     });
 }
 
-function resizeTextWidth(state, dx) {
-    var textAlignIsLeft = state.textAlign() === 'left';
-    var textWidthPct = state.textWidthPct();
+function constrainImageB(state) {
+    var composite = document.querySelector('.Composite');
+    var compositeStyle = window.getComputedStyle(composite);
+    var compositeWidth = +compositeStyle.width.replace('px', '');
+    var panelWidth = compositeWidth / 100 * (100 - state.partitionPct());
+    var compositeHeight = +compositeStyle.height.replace('px', '');
+    var imageDimensions = state.imageBDimensions();
+    var imageOffset = state.imageBOffset();
+    var imageScale;
+
+    // Image should never be smaller than panel (this will update the current scale too, if required)
+    state.imageBMinScale.set(1 / Math.min(imageDimensions.width / panelWidth, imageDimensions.height / compositeHeight));
+
+    imageScale = state.imageBScale();
+
+    // Image should never be offset inside the composite
+    state.imageBOffset.set({
+        x: util.limitedNum(imageOffset.x, 0.5 * (panelWidth - imageDimensions.width * imageScale), 0.5 * (imageDimensions.width * imageScale - panelWidth)),
+        y: util.limitedNum(imageOffset.y, 0.5 * (compositeHeight - imageDimensions.height * imageScale), 0.5 * (imageDimensions.height * imageScale - compositeHeight))
+    });
+}
+
+function movePartition(state, dx) {
+    var partitionPct = state.partitionPct();
     var compositeWidth = +window.getComputedStyle(document.querySelector('.Composite')).width.replace('px', '');
     var deltaPct = dx / compositeWidth * 100;
 
-    state.textWidthPct.set(textWidthPct + (textAlignIsLeft ? deltaPct : -deltaPct));
-}
-
-function resizeTextHeight(state, dy) {
-    var textAlignIsTop = state.textAlign() === 'top';
-    var textHeightPct = state.textHeightPct();
-    var compositeHeight = +window.getComputedStyle(document.querySelector('.Composite')).height.replace('px', '');
-    var deltaPct = dy / compositeHeight * 100;
-
-    state.textHeightPct.set(textHeightPct + (textAlignIsTop ? deltaPct : -deltaPct));
+    state.partitionPct.set(util.limitedNum(partitionPct + deltaPct, MIN_PARTITION_PCT, 100 - MIN_PARTITION_PCT));
 }
 
 function resetProp(state, propName) {

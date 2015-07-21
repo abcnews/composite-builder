@@ -17,11 +17,6 @@
     margin: 0;
 }
 
-.CompositeBuilder.is-exploded:not(.is-exporting) {
-    perspective: 1024px;
-    perspective-origin: 50% 256px;
-}
-
 @import './Composite';
 @import './Controls';
 @import './Export';

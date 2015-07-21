@@ -18,11 +18,6 @@
     perspective: 100px;
 }
 
-.Composite--theme-light {
-    background-color: #fff;
-    color: #111;
-}
-
 .Composite--squared {
     width: $compositeSquaredSize;
     height: $compositeSquaredSize;
@@ -37,11 +32,6 @@
 .is-exporting .Composite {
     margin: 0 auto;
     box-shadow: none;
-}
-
-.is-exploded:not(.is-exporting) .Composite {
-    transform: translateY(64px) rotateX(60deg) scale(0.8);
-    transition: 0.25s width, 0.25s height, 0.25s max-width, 0.25s max-height, 0.75s transform;
 }
 
 .Composite > * {
@@ -59,26 +49,6 @@
     left: 0;
 }
 
-.is-exploded:not(.is-exporting) .Composite > * {
-    transition: transform 0.25s 0.75s;
-    transform: translate3d(0, -150px, 10px);
-}
-
-.is-exploded:not(.is-exporting) .Composite > * + * {
-    transition: transform 0.5s 0.75s;
-    transform: translate3d(0, -300px, 20px);
-}
-
-.is-exploded:not(.is-exporting) .Composite > * + * + * {
-    transition: transform 0.75s 0.75s;
-    transform: translate3d(0, -450px, 30px);
-}
-
-.is-exploded:not(.is-exporting) .Composite > * + * + * + * {
-    transition: transform 1s 0.75s;
-    transform: translate3d(0, -600px, 40px);
-}
-
 .Composite img {
     vertical-align: middle;
 }
@@ -92,21 +62,15 @@
 }
 
 .Composite-image:empty::before {
-    content: "drop background image here";
-    width: 8em;
+    content: "drop image here";
     color: $lightTransparency;
-    font-size: 4em;
+    font-size: 2em;
     line-height: 1;
     text-align: center;
     text-shadow: none;
 }
 
-.Composite--theme-light .Composite-image:empty::before {
-    color: $darkTransparency;
-}
-
-.is-exporting .Composite-image:empty::before,
-.is-exploded .Composite-image:empty::before {
+.is-exporting .Composite-image:empty::before {
     content: "";
 }
 
@@ -116,379 +80,73 @@
     border: 4px dotted $blue;
 }
 
-.Composite-image img,
-.Composite-clippedImage img {
+.Composite-image img {
     position: relative;
     flex-shrink: 0;
 }
 
-.Composite-clippedImage img {
-    -webkit-filter: blur(7px);
-    filter: blur(7px);
-}
-
-.Composite-text {
-    max-width: 100%;
-    max-height: 100%;
-    overflow: hidden;
-}
-
-.Composite-image:empty + .Composite-text { 
-    cursor: default;
-}
-
-.Composite--textAlign-left .Composite-text {
-    -webkit-justify-content: flex-start;
-    justify-content: flex-start;
-}
-
-.Composite--textAlign-right .Composite-text {
-    -webkit-justify-content: flex-end;
-    justify-content: flex-end;
-}
-
-.Composite--textAlign-top .Composite-text {
-    -webkit-align-items: flex-start;
-    align-items: flex-start;
-}
-
-.Composite--textAlign-bottom .Composite-text {
-    -webkit-align-items: flex-end;
-    align-items: flex-end;
-}
-
-$centeredBlockquoteMargin: 60px;
-$horizontalBlockquoteMargin: 40px;
-
-.Composite-text blockquote {
-    display: -webkit-flex;
-    display: flex;
-    flex-direction: column;
-    -webkit-align-items: flex-start;
-    align-items: flex-start;
-    -webkit-justify-content: center;
-    justify-content: center;
-    position: absolute;
-    position: relative;
-    overflow: hidden;
-    margin: 0;
-    padding: 3%;
-    width: 100% - (200 * $centeredBlockquoteMargin / $compositeWidth);
-    height: 100% - (200 * $centeredBlockquoteMargin / $compositeHeight);
-    min-width: 35%;
-    max-width: 100%;
-    min-height: 30%;
-    max-height: 100%;
-    background-color: $darkTransparency;
-    cursor: default;
-}
-
-.Composite--textAlign-top .Composite-text blockquote,
-.Composite--textAlign-bottom .Composite-text blockquote {
-    width: 100% - (200 * $horizontalBlockquoteMargin / $compositeWidth);
-}
-
-.Composite--squared.Composite--textAlign-top .Composite-text blockquote,
-.Composite--squared.Composite--textAlign-bottom .Composite-text blockquote {
-    width: 100%;
-}
-
-.Composite--textAlign-left .Composite-text blockquote,
-.Composite--textAlign-right .Composite-text blockquote {
-    height: 100%;
-}
-
-.Composite--textAlign-centre .Composite-text blockquote {
-    height: auto;
-    font-size: 1.1em;
-}
-
-.Composite--theme-light .Composite-text blockquote {
-    background-color: $lightTransparency;
-}
-
-.Composite--squared .Composite-text blockquote {
-    padding: 4.5%;
-}
-
-.Composite-text blockquote.quote {
-    padding-left: 4%;
-}
-
-.Composite--squared .Composite-text blockquote.quote {
-    padding-left: 6%;
-}
-
-
-.Composite-text blockquote p {
-    position: relative;
-    margin: 0;
-    max-width: 100%;
-    font-size: 3em;
-    font-weight: 200;
-    line-height: 1.1;
-}
-
-.Composite-text blockquote.scale-largest p {
-    font-size: 3.75em;
-}
-
-.Composite-text blockquote.scale-larger p {
-    font-size: 3.5em;
-}
-
-.Composite-text blockquote.scale-large p {
-    font-size: 3.25em;
-}
-
-.Composite-text blockquote.scale-smallest p {
-    font-size: 2.25em;
-}
-
-.Composite-text blockquote.scale-smaller p {
-    font-size: 2.5em;
-}
-
-.Composite-text blockquote.scale-small p {
-    font-size: 2.75em;
-}
-
-.Composite-text blockquote.quote p::before {
-    content: "“";
-    position: absolute;
-    top: -0.075em;
-    left: -0.375em;
-    font-size: 70px;
-    color: $lightTransparency;
-}
-
-.Composite--theme-light .Composite-text blockquote.quote p::before {
-    color: $darkTransparency;
-}
-
-.Composite-text blockquote p:not(:empty) span {
-    position: relative;
-}
-
-.Composite-text blockquote p:not(:empty) span::after {
-    content: "”";
-    position: absolute;
-    top: -0.075em;
-    right: -0.375em;
-    font-size: 70px;
-    color: $lightTransparency;
-}
-
-.Composite--theme-light .Composite-text blockquote p:not(:empty) span::after {
-    color: $darkTransparency;
-}
-
-.Composite-text blockquote cite {
-    display: block;
-    margin: 1em 0 0;
-    font-size: 1.5em;
-    font-style: normal;
-    letter-spacing: 0.02em;
-}
-
-.Composite-text blockquote cite:before {
-    content: "— ";
-}
-
-.Composite-text em {
+.Composite-image em {
     position: absolute;
     display: block;
     bottom: 8px;
-    right: 10px;
+    left: 10px;
     font-size: 0.8em;
     font-style: normal;
     line-height: 1;
     color: opacify($lightTransparency, 0.25);
 }
 
-.Composite--theme-light .Composite-text em {
-    color: opacify($darkTransparency, 0.5);
+.Composite-image + .Composite-image em {
+    right: 10px;
+    left: auto;
 }
 
-.Composite--textAlign-bottom:not(.Composite--squared) .Composite-text em {
-    right: 20px;
+
+.Composite-partition {
+    max-width: 100%;
+    max-height: 100%;
+    overflow: hidden;
+    -webkit-justify-content: flex-start;
+    justify-content: flex-start;
 }
 
-.Composite--textAlign-bottom .Composite-text em {
-    right: 30px;
-}
-
-.Composite-textResizeHandle {
+.Composite-partitionMoveHandle {
     display: block;
     position: absolute;
+    top: 0;
+    bottom: 0;
+    margin-left: -1em;
+    width: 2em;
+    opacity: 0;
+    background-color: opacify($darkTransparency, 0.25);
+    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAOCAQAAACFzfR7AAAAYElEQVR4AY2PsREAERQFScwoQXcipehBDRJViPS0N0bk7ty93RmSDd43CyLm2/lYMvyHnspkPN3DxpktDHQtNDiKsnGZ1PBsVEPI2Hs4XpxU/B6eaVrYCcrGglOOSeu/AL3aZg9JcOdzAAAAAElFTkSuQmCC);
     background-position: center center;
     background-repeat: no-repeat;
     cursor: move;
 }
 
-.Composite-textResizeHandle--vertical {
-    top: 0;
-    width: 2em;
-    height: 100%;
+.Composite:first-of-type .Composite-partitionMoveHandle {
     background-size: 20px 14px;
-    cursor: col-resize;
-}
-
-.Composite-textResizeHandle--horizontal {
-    left: 0;
-    width: 100%;
-    height: 2em;
-    background-size: 14px 20px;
-    cursor: row-resize;
-}
-
-.Composite--textAlign-left .Composite-textResizeHandle {
-    right: 0;
-}
-
-.Composite--textAlign-right .Composite-textResizeHandle {
-    left: 0;
-}
-
-.Composite--textAlign-top .Composite-textResizeHandle {
-    bottom: 0;
-}
-
-.Composite--textAlign-bottom .Composite-textResizeHandle {
-    top: 0;
-}
-
-.Composite-text blockquote:hover .Composite-textResizeHandle {
-    background-color: $darkTransparency;
-}
-
-.Composite-text blockquote .Composite-textResizeHandle:hover,
-.Composite-text blockquote .Composite-textResizeHandle:active {
-    background-color: opacify($darkTransparency, 0.25);
-}
-
-.Composite-text blockquote:hover .Composite-textResizeHandle--vertical,
-.Composite-text blockquote .Composite-textResizeHandle--vertical:hover,
-.Composite-text blockquote .Composite-textResizeHandle--vertical:active {
-    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAOCAQAAACFzfR7AAAAYElEQVR4AY2PsREAERQFScwoQXcipehBDRJViPS0N0bk7ty93RmSDd43CyLm2/lYMvyHnspkPN3DxpktDHQtNDiKsnGZ1PBsVEPI2Hs4XpxU/B6eaVrYCcrGglOOSeu/AL3aZg9JcOdzAAAAAElFTkSuQmCC);
-}
-
-.Composite:first-of-type .Composite-text blockquote:hover .Composite-textResizeHandle--vertical,
-.Composite:first-of-type .Composite-text blockquote .Composite-textResizeHandle--vertical:hover,
-.Composite:first-of-type .Composite-text blockquote .Composite-textResizeHandle--vertical:active {
     background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAcCAQAAAC5HDVdAAAArElEQVR4Aa3ToQ2FMBjE8U91ABwDsAJJFUswQ3dgDlQVq6AYggFwWJIa/k9VVDwezbs79ZlfQnNYGXrsv5bnyKUEJ25QgY4FQAU2rOTEl30AO3bq8xUcOEEJzqAFjUDSgobn0IJGy6aaTa4jasH8mlLQ8Gqwvr0avBi1INxMWhBgwf0C48vmrDTPYH12Oi0IJ4MWhFkJJoLykw+8cjYbrXKHEacbdiJofz1f3h/LY51Dy3tN7AAAAABJRU5ErkJggg==);
 }
 
-.Composite-text blockquote:hover .Composite-textResizeHandle--horizontal,
-.Composite-text blockquote .Composite-textResizeHandle--horizontal:hover,
-.Composite-text blockquote .Composite-textResizeHandle--horizontal:active {
-    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAUCAQAAAAXDMSnAAAAUklEQVR4AWPABP85/2/4L/mf4T+QiQ4Z/6/+////sf9s2CTb/kPATEzJhP8IkIYQRsAzIBkQC78kgjuSJBGQoCRaUKNKokUSKkSLXkxJeMJAhwBgWGAVI1LCIQAAAABJRU5ErkJggg==);
+.Composite-partitionMoveHandle:hover,
+.Composite-partitionMoveHandle:active {
+    opacity: 1;
 }
 
-.Composite:first-of-type .Composite-text blockquote:hover .Composite-textResizeHandle--horizontal,
-.Composite:first-of-type .Composite-text blockquote .Composite-textResizeHandle--horizontal:hover,
-.Composite:first-of-type .Composite-text blockquote .Composite-textResizeHandle--horizontal:active {
-    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAoCAQAAABH71KkAAAAlElEQVR4Ae2WoQ0CQRQFv7oCcBRACySnaIIargfqQK2iFRRFUAAOS3KGQRCyBMjkn+OSnZGbsf9tZGHDnqgGOVdcgWFquOAMwEg/Jew48uLCMh8eeOdElwt3fFIy4ZY73wx4yJobvxjpg4yFSjydUSiPfxW2sIUtFGcVytH1UM68KcPiypS5Mp6uzLWrH4RsWL8kCR/MrJBQNEvLOwAAAABJRU5ErkJggg==);
-}
-
-.is-exporting .Composite-textResizeHandle {
-    display: none;
-}
-
-.Composite-branding {
-    pointer-events: none;
-}
-
-.Composite-branding > * {
-    display: block;
+.Composite-partitionMoveHandle:after {
+    content: attr(title);
     position: absolute;
-    overflow: hidden;
-    top: auto;
-    right: 37px;
-    bottom: 37px;
-    left: auto;
-    max-width: 85%;
-    max-height: 20%;
-    text-align: right;
-    cursor: default;
-    pointer-events: auto;
-}
-
-.Composite--droppable .Composite-branding > * {
-    box-sizing: content-box;
-    margin: -4px;
-    border: 4px dotted $blue;
-}
-
-.Composite--squared .Composite-branding > * {
-    right: 30px;
-    bottom: 30px;
-}
-
-.Composite--textAlign-right .Composite-branding > * {
-    right: auto;
-    left: 37px;
-    text-align: left;
-    transform-origin: 0 100%;
-}
-
-.Composite--textAlign-right.Composite--squared .Composite-branding > * {
-    left: 30px;
-}
-
-.Composite--textAlign-bottom:not(.Composite--squared) .Composite-branding > * {
-    right: 60px;
-}
-
-.Composite-image:not(:empty) ~ .Composite-brandingPlaceholder {
-    background-color: $darkTransparency;
-}
-
-.Composite--theme-light .Composite-image:not(:empty) ~ .Composite-brandingPlaceholder {
-    background-color: $darkTransparency;
-}
-
-.Composite-branding img.is-shadowed {
-    box-shadow: 0 0 10px rgba(0,0,0,0.3);
-}
-
-.is-modifierHeldDown .Composite-branding img:hover {
-    box-sizing: content-box;
-    margin: -4px;
-    border: 4px dotted $red;
-    cursor: pointer;
-}
-
-.Composite-brandingPlaceholder {
-    min-width: 12em;
-    min-height: 4em;
-}
-
-.is-exporting .Composite-brandingPlaceholder {
-    display: none;
-}
-
-.Composite-brandingPlaceholder::before {
-    content: "drop branding image here";
-    position: absolute;
-    left: 0;
-    padding: 0.25em 0;
-    background-color: $darkTransparency;
-    color: $lightTransparency;
-    font-size: 1.5em;
-    line-height: 1.1;
+    bottom: 0.5em;
+    width: 2em;
+    color: #fff;
     text-align: center;
-    text-shadow: none;
 }
 
-.Composite--theme-light .Composite-image:empty ~ .Composite-brandingPlaceholder::before {
-    background-color: $lightTransparency;
-    color: $darkTransparency;
-}
-
-.is-exporting .Composite-brandingPlaceholder::before,
-.is-exploded .Composite-brandingPlaceholder::before {
-    content: "";
+.Composite--droppable .Composite-partitionMoveHandle,
+.is-exporting .Composite-partitionMoveHandle {
+    display: none;
 }
 
 .Composite-faq {
@@ -496,10 +154,6 @@ $horizontalBlockquoteMargin: 40px;
     flex-direction: column;
     background-color: black;
     cursor: default;
-}
-
-.Composite--theme-light .Composite-faq {
-    background-color: white;
 }
 
 .is-exporting .Composite-faq {
