@@ -1,5 +1,5 @@
 module.exports = {
-	nucpnoutil01: {
+	newsdev3: {
         deploy: 'newsdev3',
         build: 'prod'
     }
