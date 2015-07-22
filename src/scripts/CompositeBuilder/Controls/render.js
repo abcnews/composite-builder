@@ -64,7 +64,21 @@ function render(state) {
             'ev-event': hg.sendChange(state.channels.imageScaleRangeChange)
         }),
 
-        // Row 3: Square Toggle
+        // Row 3: Partition Ratio / Square Toggle
+
+        h('label', {htmlFor: 'partitionPct'}, 'Partition Ratio'),
+        h('button.Controls-partitionPct.Controls-partitionPct--1x2', {
+            disabled: state.partitionPct === 33.33,
+            'ev-click': hg.send(propsChange, {partitionPct: 33.33})
+        }, '1:2'),
+        h('button.Controls-partitionPct.Controls-partitionPct--1x1', {
+            disabled: state.partitionPct === 50,
+            'ev-click': hg.send(propsChange, {partitionPct: 50})
+        }, '1:1'),
+        h('button.Controls-partitionPct.Controls-partitionPct--2x1', {
+            disabled: state.partitionPct === 66.67,
+            'ev-click': hg.send(propsChange, {partitionPct: 66.67})
+        }, '2:1'),
 
         h('label', {htmlFor: 'isSquared'}, 'Squared'),
         h('button.Controls-isSquared.Controls-isSquared--yes', {
