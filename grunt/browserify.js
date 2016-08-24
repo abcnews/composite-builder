@@ -1,20 +1,20 @@
 module.exports = {
-	"options": {
-		"transform": ["brfs"]
-	},
 	"dev": {
 		"options": {
 			"debug": true
 		},
-		"files": {
-			"build/scripts/index.js": ["src/scripts/index.js"],
-			"build/scripts/archive.js": ["src/scripts/archive-index.js"]
-		}
+		"cwd": 'src/scripts/',
+		"src": ['index.js', 'archive-index.js'],
+		"expand": true,
+		"dest": 'build/scripts/'
 	},
 	"prod": {
-		"files": {
-			"build/scripts/index.js": ["src/scripts/index.js"],
-			"build/scripts/archive.js": ["src/scripts/archive-index.js"]
-		}
+		"options": {
+			"debug": false
+		},
+		"cwd": 'src/scripts/',
+		"src": ['index.js', 'archive-index.js'],
+		"expand": true,
+		"dest": 'build/scripts/'
 	}
 };

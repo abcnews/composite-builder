@@ -5,7 +5,7 @@ var util = require('./util');
 
 module.exports = CompositeBuilder;
 
-function CompositeBuilder(db) {
+function CompositeBuilder(db, ASSETS_ROOT) {
 
     var isModifierHeldDown = hg.value(false);
 
@@ -16,7 +16,7 @@ function CompositeBuilder(db) {
         isModifierHeldDown: isModifierHeldDown,
         isExporting: hg.value(false),
         channels: {
-            exportLinkClick: exportComposite.bind(null, db)
+            exportLinkClick: exportComposite.bind(null, db, ASSETS_ROOT)
         }
     });
 
@@ -27,8 +27,9 @@ function CompositeBuilder(db) {
 
 CompositeBuilder.render = require('./render');
 
-function exportComposite(db, state, data) {
-    var $composite, $canvas, tmpBlob;
+function exportComposite(db, baseUrl, state, data) {
+    // var $composite, $canvas, tmpBlob;
+    var $composite, $canvas;
 
     $composite = document.querySelector('.Composite');
     $canvas = document.createElement('canvas');
@@ -37,11 +38,13 @@ function exportComposite(db, state, data) {
 
     state.isExporting.set(true);
 
-    tmpBlob = window.Blob;
-    window.Blob = undefined;
+    // tmpBlob = window.Blob;
+    // window.Blob = undefined;
 
-    rasterizeHTML.drawDocument(document, $canvas).then(function () {
-        window.Blob = tmpBlob;
+    rasterizeHTML.drawDocument(document, $canvas, {
+        baseUrl: baseUrl
+    }).then(function () {
+        // window.Blob = tmpBlob;
 
         state.isExporting.set(false);
 

@@ -1,5 +1,4 @@
 var hg = require('mercury');
-var img = require('img');
 var observify = require('observify');
 
 var render = require('./render');
@@ -66,7 +65,7 @@ function setupInternalUpdates(state) {
     // * reset the offset & scale
     // * set the new image orientation
     state.imageAURL(function (imageURL) {
-        img(imageURL, function (err, image) {
+        util.loadImage(imageURL, {crossOrigin: true}, function (err, image) {
             if (err) {
                 return;
             }
@@ -77,10 +76,9 @@ function setupInternalUpdates(state) {
             constrainImageA(state);
             state.imageAScale.set(state.imageAMinScale());
         });
-        
     });
     state.imageBURL(function (imageURL) {
-        img(imageURL, function (err, image) {
+        util.loadImage(imageURL, function (err, image) {
             if (err) {
                 return;
             }
@@ -91,7 +89,7 @@ function setupInternalUpdates(state) {
             constrainImageB(state);
             state.imageBScale.set(state.imageBMinScale());
         });
-        
+
     });
 
     // When an image's minimum scale changes, update its current scale
@@ -153,11 +151,14 @@ function imageUpdater(propName) {
             return;
         }
 
-        if ('URL' in window && 'createObjectURL' in window.URL) {
-            window.URL.revokeObjectURL(state[propName]());
-            state[propName].set(window.URL.createObjectURL(file));
-            return;
-        }
+        // Note: Disabled `URL.createObjectURL` strategy for now due to recent
+        // browser cross-domain issues with generated URLs in canvas export
+
+        // if ('URL' in window && 'createObjectURL' in window.URL) {
+        //     window.URL.revokeObjectURL(state[propName]());
+        //     state[propName].set(window.URL.createObjectURL(file));
+        //     return;
+        // }
 
         var reader = new FileReader();
         reader.onload = function (e) {

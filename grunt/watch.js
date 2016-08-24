@@ -14,11 +14,16 @@ module.exports = {
 	},
 	"css": {
 		"files": "src/styles/**/*.scss",
-		"tasks": "compass:dev",
+		"tasks": "sass:dev",
+		"interrupt": true
+	},
+	"concat": {
+		"files": "src/vendor/*",
+		"tasks": "concat:vendorjs",
 		"interrupt": true
 	},
 	"copy": {
-		"files": ["src/**/*", "!src/scripts/*", "!src/styles/*"],
+		"files": ["src/**/*", "!src/scripts/*", "!src/styles/*", "!src/vendor/*"],
 		"tasks": "copy:static",
 		"interrupt": true
 	},

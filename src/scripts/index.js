@@ -5,17 +5,19 @@
  * @author Colin Gourlay <gourlay.colin@abc.net.au>
  */
 
+var domready = require('domready');
 var hg = require('mercury');
-
-var db = require('./db');
+var scriptroot = require('scriptroot');
 var CompositeBuilder = require('./CompositeBuilder');
+var db = require('./db');
 
-require('domready')(function () {
-    var d = hg.Delegator();
+var ASSETS_ROOT = scriptroot().slice(0, -8);
+var del = hg.Delegator();
 
-    d.listenTo('dragover');
-    d.listenTo('dragleave');
-    d.listenTo('drop');
+del.listenTo('dragover');
+del.listenTo('dragleave');
+del.listenTo('drop');
 
-    hg.app(document.body, CompositeBuilder(db), CompositeBuilder.render);
+domready(function () {
+    hg.app(document.body, CompositeBuilder(db, ASSETS_ROOT), CompositeBuilder.render);
 });
