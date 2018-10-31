@@ -1,4 +1,4 @@
-#composite-builder
+# composite-builder
 
 A tool for building composite graphics.
 
