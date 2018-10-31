@@ -1,0 +1,12 @@
+$scale: 1;
+$aspectRatio: 0.75;
+$compositeWidth: round(940px * $scale);
+$compositeHeight: round($compositeWidth * $aspectRatio);
+$compositeSquaredScale: 32 / 47;
+$compositeSquaredSize: round($compositeWidth * $compositeSquaredScale);
+$red: #c0392b;
+$blue: #2980b9;
+$green: #27ae60;
+$grey: #666;
+$lightTransparency: rgba(255, 255, 255, 0.45);
+$darkTransparency: rgba(0, 0, 0, 0.45);

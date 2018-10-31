@@ -1,7 +1,10 @@
-.DS_Store
-.nwjs-cache
-.sass-cache
-apps
-build
+# dependencies
 node_modules
+
+# builds
+/build
+
+# misc
+.DS_Store
 npm-debug.log
+.envrc
