@@ -4,6 +4,8 @@ A tool for building composite graphics.
 
 ## Releasing
 
+The Composite Builder is now hosted on [GitHub Pages](https://abcnews.github.io/composite-builder/), so don't use aunty's `deploy` or `release` commands. Instead, do the following:
+
 1. Build the project with `aunty build`
 2. Commit the changes to `/docs`
 3. Bump the major/minor/patch version with `npm version {major|minor|patch}`
