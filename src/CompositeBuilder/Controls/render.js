@@ -114,7 +114,7 @@ function render(state) {
 
     h('span.Controls-info', [
       h('strong', 'Remember: '),
-      'Only use images on social media if the ABC has the rights to them.'
+      'Please respect copyright laws when posting to social media.'
     ]),
     h(
       'a.Controls-faq',
@@ -126,7 +126,7 @@ function render(state) {
     ),
     h(
       'a.Controls-feedback',
-      { href: 'mailto:gourlay.colin@abc.net.au?subject=Composite Builder Feedback' },
+      { href: 'https://github.com/abcnews/composite-builder/issues' },
       'Feedback?'
     )
   ]);
