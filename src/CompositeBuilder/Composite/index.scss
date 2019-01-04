@@ -1,190 +1,192 @@
-@import '../../constants';
+@import '../constants';
 
-.Composite {
-  position: relative;
-  margin: 30px auto;
-  width: $compositeWidth;
-  height: $compositeHeight;
-  max-width: $compositeWidth;
-  max-height: $compositeHeight;
-  background-color: #000;
-  color: #fff;
-  font-size: 1em * $scale;
-  box-shadow: 0 0 1px 1px rgba(0, 0, 0, 0.15), 0 0 10em rgba(0, 0, 0, 0.1);
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  cursor: move;
-  transition: 0.25s width, 0.25s height, 0.25s max-width, 0.25s max-height;
-  perspective: 100px;
-}
+:global {
+  .Composite {
+    position: relative;
+    margin: 30px auto;
+    width: $compositeWidth;
+    height: $compositeHeight;
+    max-width: $compositeWidth;
+    max-height: $compositeHeight;
+    background-color: #000;
+    color: #fff;
+    font-size: 1em * $scale;
+    box-shadow: 0 0 1px 1px rgba(0, 0, 0, 0.15), 0 0 10em rgba(0, 0, 0, 0.1);
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    cursor: move;
+    transition: 0.25s width, 0.25s height, 0.25s max-width, 0.25s max-height;
+    perspective: 100px;
+  }
 
-.Composite--squared {
-  width: $compositeSquaredSize;
-  height: $compositeSquaredSize;
-  max-width: $compositeSquaredSize;
-  max-height: $compositeSquaredSize;
-}
+  .Composite--squared {
+    width: $compositeSquaredSize;
+    height: $compositeSquaredSize;
+    max-width: $compositeSquaredSize;
+    max-height: $compositeSquaredSize;
+  }
 
-.is-modifierHeldDown .Composite {
-  cursor: zoom-in;
-}
+  .is-modifierHeldDown .Composite {
+    cursor: zoom-in;
+  }
 
-.is-exporting .Composite {
-  margin: 0 auto;
-  box-shadow: none;
-}
+  .is-exporting .Composite {
+    margin: 0 auto;
+    box-shadow: none;
+  }
 
-.Composite > * {
-  display: -webkit-flex;
-  display: flex;
-  overflow: hidden;
-  align-items: center;
-  justify-content: center;
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-}
+  .Composite > * {
+    display: -webkit-flex;
+    display: flex;
+    overflow: hidden;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+  }
 
-.Composite img {
-  vertical-align: middle;
-}
+  .Composite img {
+    vertical-align: middle;
+  }
 
-.Composite-image:empty {
-  cursor: default;
-}
+  .Composite-image:empty {
+    cursor: default;
+  }
 
-.Composite-image:not(:empty).is-contained {
-  background-color: #000;
-}
+  .Composite-image:not(:empty).is-contained {
+    background-color: #000;
+  }
 
-.Composite-image:empty::before {
-  content: 'drop image here';
-  color: $lightTransparency;
-  font-size: 2em;
-  line-height: 1;
-  text-align: center;
-  text-shadow: none;
-}
+  .Composite-image:empty::before {
+    content: 'drop image here';
+    color: $lightTransparency;
+    font-size: 2em;
+    line-height: 1;
+    text-align: center;
+    text-shadow: none;
+  }
 
-.is-exporting .Composite-image:empty::before {
-  content: '';
-}
+  .is-exporting .Composite-image:empty::before {
+    content: '';
+  }
 
-.Composite--droppable .Composite-image {
-  box-sizing: content-box;
-  margin: -4px;
-  border: 4px dotted $blue;
-}
+  .Composite--droppable .Composite-image {
+    box-sizing: content-box;
+    margin: -4px;
+    border: 4px dotted $blue;
+  }
 
-.Composite-image img {
-  position: relative;
-  flex-shrink: 0;
-}
+  .Composite-image img {
+    position: relative;
+    flex-shrink: 0;
+  }
 
-.Composite-image em {
-  position: absolute;
-  display: block;
-  bottom: 8px;
-  left: 10px;
-  font-size: 0.8em;
-  font-style: normal;
-  line-height: 1;
-  color: opacify($lightTransparency, 0.25);
-}
+  .Composite-image em {
+    position: absolute;
+    display: block;
+    bottom: 8px;
+    left: 10px;
+    font-size: 0.8em;
+    font-style: normal;
+    line-height: 1;
+    color: opacify($lightTransparency, 0.25);
+  }
 
-.Composite-image + .Composite-image em {
-  right: 10px;
-  left: auto;
-}
+  .Composite-image + .Composite-image em {
+    right: 10px;
+    left: auto;
+  }
 
-.Composite-partition {
-  max-width: 100%;
-  max-height: 100%;
-  overflow: hidden;
-  justify-content: flex-start;
-}
+  .Composite-partition {
+    max-width: 100%;
+    max-height: 100%;
+    overflow: hidden;
+    justify-content: flex-start;
+  }
 
-.Composite-partitionMoveHandle {
-  display: block;
-  right: auto;
-  margin-left: -1em;
-  width: 2em;
-  opacity: 0;
-  background-color: opacify($darkTransparency, 0.25);
-  background-image: url(./handle.png);
-  background-position: center center;
-  background-repeat: no-repeat;
-  background-size: 20px 14px;
-  cursor: move;
-  cursor: col-resize;
-}
+  .Composite-partitionMoveHandle {
+    display: block;
+    right: auto;
+    margin-left: -1em;
+    width: 2em;
+    opacity: 0;
+    background-color: opacify($darkTransparency, 0.25);
+    background-image: url(./handle.png);
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: 20px 14px;
+    cursor: move;
+    cursor: col-resize;
+  }
 
-.Composite-partitionMoveHandle:hover,
-.Composite-partitionMoveHandle:active {
-  opacity: 1;
-}
+  .Composite-partitionMoveHandle:hover,
+  .Composite-partitionMoveHandle:active {
+    opacity: 1;
+  }
 
-.Composite-partitionMoveHandle:after {
-  content: attr(title);
-  position: absolute;
-  right: 0;
-  left: 0;
-  bottom: 0.5em;
-  color: #fff;
-  font-size: 85%;
-  text-align: center;
-}
+  .Composite-partitionMoveHandle:after {
+    content: attr(title);
+    position: absolute;
+    right: 0;
+    left: 0;
+    bottom: 0.5em;
+    color: #fff;
+    font-size: 85%;
+    text-align: center;
+  }
 
-.Composite--droppable .Composite-partitionMoveHandle,
-.is-exporting .Composite-partitionMoveHandle {
-  display: none;
-}
+  .Composite--droppable .Composite-partitionMoveHandle,
+  .is-exporting .Composite-partitionMoveHandle {
+    display: none;
+  }
 
-.Composite-faq {
-  -webkit-flex-direction: column;
-  flex-direction: column;
-  background-color: black;
-  cursor: default;
-}
+  .Composite-faq {
+    -webkit-flex-direction: column;
+    flex-direction: column;
+    background-color: black;
+    cursor: default;
+  }
 
-.is-exporting .Composite-faq {
-  display: none;
-}
+  .is-exporting .Composite-faq {
+    display: none;
+  }
 
-.Composite-faq h1 {
-  margin: 0 0 30px;
-}
+  .Composite-faq h1 {
+    margin: 0 0 30px;
+  }
 
-.Composite-faq dl {
-  margin: 0 auto;
-  width: 512px;
-}
+  .Composite-faq dl {
+    margin: 0 auto;
+    width: 512px;
+  }
 
-.Composite-faq dt {
-  margin: 15px 0 10px;
-  text-decoration: underline;
-}
+  .Composite-faq dt {
+    margin: 15px 0 10px;
+    text-decoration: underline;
+  }
 
-.Composite-faq dd {
-  margin: 0;
-  // color: #666;
-}
+  .Composite-faq dd {
+    margin: 0;
+    // color: #666;
+  }
 
-.Composite-faqHide {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 1em;
-  font-size: 2em;
-  line-height: 1;
-  text-align: center;
-  cursor: pointer;
-}
+  .Composite-faqHide {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 1em;
+    font-size: 2em;
+    line-height: 1;
+    text-align: center;
+    cursor: pointer;
+  }
 
-.Composite-faqHide:not(:hover) {
-  color: #666;
+  .Composite-faqHide:not(:hover) {
+    color: #666;
+  }
 }

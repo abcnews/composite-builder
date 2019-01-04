@@ -1,12 +1,10 @@
-const { app, Delegator } = require('mercury');
-const CompositeBuilder = require('./CompositeBuilder');
-require('./global.scss');
+// Moving to React
+import React from 'react';
+import { render } from 'react-dom';
+
+const App = require('./components/App');
 
 const root = document.querySelector(`[data-composite-builder-root]`);
-const del = Delegator();
 
-del.listenTo('dragover');
-del.listenTo('dragleave');
-del.listenTo('drop');
-
-app(root, CompositeBuilder(), CompositeBuilder.render);
+// Render main App in React
+render(<App projectName={"composite-builder"} />, root);
