@@ -1,8 +1,8 @@
 module.exports = {
-  type: 'basic',
+  type: 'react',
   build: {
     to: 'docs',
-    useCSSModules: false
+    useCSSModules: true
   },
   clean: 'docs',
   devServer: {

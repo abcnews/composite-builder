@@ -1,43 +1,45 @@
-@import '../../constants';
+@import '../constants';
 
-.Export {
-  display: flex;
-  justify-content: space-between;
-  margin: 30px auto;
-  width: $compositeWidth;
-}
+:global {
+  .Export {
+    display: flex;
+    justify-content: space-between;
+    margin: 30px auto;
+    width: $compositeWidth;
+  }
 
-.is-exporting .Export {
-  overflow: hidden;
-  margin: 0;
-  height: 0;
-}
+  .is-exporting .Export {
+    overflow: hidden;
+    margin: 0;
+    height: 0;
+  }
 
-.Export-link {
-  display: block;
-  flex: 1 0 auto;
-  margin: 0 0.5em;
-  padding: 1em;
-  height: 3em;
-  width: auto;
-  background-color: $blue;
-  color: white;
-  font-size: 1.25em;
-  text-align: center;
-  text-decoration: none;
-  vertical-align: middle;
-  box-shadow: 0 1px 1px #e5e5e5;
-  cursor: pointer;
-}
+  .Export-link {
+    display: block;
+    flex: 1 0 auto;
+    margin: 0 0.5em;
+    padding: 1em;
+    height: 3em;
+    width: auto;
+    background-color: $blue;
+    color: white;
+    font-size: 1.25em;
+    text-align: center;
+    text-decoration: none;
+    vertical-align: middle;
+    box-shadow: 0 1px 1px #e5e5e5;
+    cursor: pointer;
+  }
 
-.Export-link:first-child {
-  margin-left: 0;
-}
+  .Export-link:first-child {
+    margin-left: 0;
+  }
 
-.Export-link:last-child {
-  margin-right: 0;
-}
+  .Export-link:last-child {
+    margin-right: 0;
+  }
 
-.Export-link:hover {
-  box-shadow: 0 0 5px 5px #e5e5e5;
+  .Export-link:hover {
+    box-shadow: 0 0 5px 5px #e5e5e5;
+  }
 }
