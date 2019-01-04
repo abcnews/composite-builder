@@ -6,7 +6,7 @@ A tool for building composite graphics.
 
 1. Build the project with `aunty build`
 2. Commit the changes to `/docs`
-3. Bump the major/minor/patch version with `npm version`
+3. Bump the major/minor/patch version with `npm version {major|minor|patch}`
 4. Push everything to to GitHub with `git push --all && git push --tags`
 
 ## Authors
