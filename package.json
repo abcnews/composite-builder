@@ -5,7 +5,8 @@
   "license": "MIT",
   "private": true,
   "contributors": [
-    "Colin Gourlay <gourlay.colin@abc.net.au>"
+    "Colin Gourlay <gourlay.colin@abc.net.au>",
+    "Joshua Byrd <byrd.joshua@abc.net.au>"
   ],
   "scripts": {
     "start": "aunty serve"
