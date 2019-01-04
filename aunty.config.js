@@ -10,7 +10,7 @@ module.exports = {
   },
   webpack: config => {
     if (process.env.NODE_ENV === 'production') {
-      config.output.publicPath = 'https://abcnews.github.com/composite-builder/';
+      config.output.publicPath = 'https://abcnews.github.io/composite-builder/';
     }
 
     return config;
