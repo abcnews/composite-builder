@@ -20,5 +20,8 @@
   },
   "devDependencies": {
     "@abcnews/aunty": "^9.8.2"
+  },
+  "prettier": {
+    "singleQuote": true
   }
 }
