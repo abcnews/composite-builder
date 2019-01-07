@@ -1,29 +1,20 @@
 const React = require('react');
 const styles = require('./styles.scss');
 
-// Old Mercury frontend library
-const { app, Delegator } = require('mercury');
-const CompositeBuilder = require('../../CompositeBuilder');
-require('../../CompositeBuilder/global.scss');
-
-const del = Delegator();
-
-del.listenTo('dragover');
-del.listenTo('dragleave');
-del.listenTo('drop');
+// Import components
+const TwoImage = require('../TwoImage');
 
 class App extends React.Component {
   state = {
     view: 'two-image'
   };
 
-  componentDidMount() {
-    
-      app(this.node, CompositeBuilder(), CompositeBuilder.render);
-  }
-
   render() {
-    return <div className={styles.wrapper} ref={el => (this.node = el)} />;
+    return (
+      <div className={styles.wrapper}>
+        {this.state.view === 'two-image' && <TwoImage />}
+      </div>
+    );
   }
 }
 
