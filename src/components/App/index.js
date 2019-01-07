@@ -6,7 +6,6 @@ const { app, Delegator } = require('mercury');
 const CompositeBuilder = require('../../CompositeBuilder');
 require('../../CompositeBuilder/global.scss');
 
-const root = document.querySelector(`[data-composite-builder-root]`);
 const del = Delegator();
 
 del.listenTo('dragover');
@@ -14,16 +13,17 @@ del.listenTo('dragleave');
 del.listenTo('drop');
 
 class App extends React.Component {
+  state = {
+    view: 'two-image'
+  };
+
   componentDidMount() {
-    app(this.node, CompositeBuilder(), CompositeBuilder.render);
+    
+      app(this.node, CompositeBuilder(), CompositeBuilder.render);
   }
 
   render() {
-    return (
-      <div className={styles.wrapper} ref={el => (this.node = el)}>
-        
-      </div>
-    );
+    return <div className={styles.wrapper} ref={el => (this.node = el)} />;
   }
 }
 

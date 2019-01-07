@@ -14,5 +14,8 @@ module.exports = {
     }
 
     return config;
+  },
+  babel: {
+    plugins: ['@babel/plugin-proposal-class-properties']
   }
 };
