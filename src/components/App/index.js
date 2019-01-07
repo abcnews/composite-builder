@@ -1,18 +1,24 @@
 const React = require('react');
 const styles = require('./styles.scss');
 
-// Import components
+// Component imports
+const LayoutSelect = require('../LayoutSelect');
 const TwoImage = require('../TwoImage');
 
 class App extends React.Component {
   state = {
-    view: 'two-image'
+    view: 'layout-select'
   };
+
+  changeView = (newView) => {
+    this.setState( {view: newView })
+  }
 
   render() {
     return (
       <div className={styles.wrapper}>
-        {this.state.view === 'two-image' && <TwoImage />}
+        {this.state.view === 'layout-select' && <LayoutSelect viewFunction={this.changeView}/>}
+        {this.state.view === 'two-image' && <TwoImage viewFunction={this.changeView} />}
       </div>
     );
   }

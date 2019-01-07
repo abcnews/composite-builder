@@ -16,8 +16,21 @@ class TwoImage extends React.Component {
   componentDidMount() {
     app(this.node, CompositeBuilder(), CompositeBuilder.render);
   }
+
+  handleClick = event => {
+    event.preventDefault();
+    this.props.viewFunction('layout-select');
+  };
+
   render() {
-    return <div className={styles.wrapper} ref={el => (this.node = el)} />;
+    return (
+      <div className={styles.wrapper}>
+        <div ref={el => (this.node = el)} />
+        <a href="#" onClick={this.handleClick}>
+          Return to layout selection
+        </a>
+      </div>
+    );
   }
 }
 
