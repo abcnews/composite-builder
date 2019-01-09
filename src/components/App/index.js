@@ -2,11 +2,11 @@ const React = require('react');
 const styles = require('./styles.scss');
 
 // Component imports
-const LayoutSelect = require('../LayoutSelect');
-const TwoImage = require('../TwoImage');
-const TwoDiagonal = require('../TwoDiagonal');
+import LayoutSelect from '../LayoutSelect';
+import TwoImage from '../TwoImage';
+import TwoDiagonal from '../TwoDiagonal';
 
-class App extends React.Component {
+export default class App extends React.Component {
   state = {
     view: 'layout-select'
   };
@@ -49,4 +49,4 @@ class App extends React.Component {
   }
 }
 
-module.exports = App;
+// module.exports = App;

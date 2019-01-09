@@ -14,10 +14,10 @@ class LayoutSelect extends React.Component {
     return (
       <div className={styles.wrapper}>
         <p>Please select the layout you wish to use.</p>
-        <a onClick={this.handleClick} href="#two-image">
+        <a onClick={this.handleClick} href="#two-image" title="Two images side by side">
           <img width="320" src={twoImage} name={'two-image'} />
         </a>
-        <a onClick={this.handleClick} href="#two-diagonal">
+        <a onClick={this.handleClick} href="#two-diagonal" title="Two images split diagonally">
           <img width="320" src={twoDiagonal} name={'two-diagonal'} />
         </a>
       </div>
