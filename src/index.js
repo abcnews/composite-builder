@@ -2,8 +2,6 @@
 import React from 'react';
 import { render } from 'react-dom';
 
-console.log(React.useState)
-
 import App from './components/App';
 
 // To enable async/await
