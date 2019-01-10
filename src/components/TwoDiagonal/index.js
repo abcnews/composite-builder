@@ -10,6 +10,8 @@ const BUILDER_WIDTH = 640;
 const BUILDER_HEIGHT = 480;
 
 let app; // Will be the PIXI app
+let diagonalMask;
+let semicircle;
 
 export default class TwoDiagonal extends React.Component {
   state = {
@@ -34,24 +36,45 @@ export default class TwoDiagonal extends React.Component {
     this.draggify(this.topImage);
     this.draggify(this.bottomImage);
 
-    // Add a mask to the stage
-    var diagonalMask = new PIXI.Graphics();
-    app.stage.addChild(diagonalMask);
-    diagonalMask.x = 0;
-    app.screen.width / 2;
-    diagonalMask.y = 0;
-    app.screen.height / 2;
-    diagonalMask.lineStyle(0);
+    // Add a mask to the stage PS: we are using a semi circle mask now
+    // diagonalMask = new PIXI.Graphics();
+    // // app.stage.addChild(diagonalMask);
+    // diagonalMask.x = BUILDER_WIDTH / 2;
+    // diagonalMask.y = BUILDER_HEIGHT / 2;
+    // diagonalMask.lineStyle(0);
 
-    this.topImage.mask = diagonalMask;
+    // // this.topImage.mask = diagonalMask;
 
-    diagonalMask.clear();
+    // diagonalMask.pivot.x = BUILDER_WIDTH / 2;
+    // diagonalMask.pivot.y = BUILDER_HEIGHT / 2;
 
-    diagonalMask.beginFill(0x8bc5ff, 0.4);
-    diagonalMask.moveTo(0, 0);
-    diagonalMask.lineTo(BUILDER_WIDTH, 0);
-    diagonalMask.lineTo(0, BUILDER_HEIGHT);
-    diagonalMask.lineTo(0, 0);
+    // diagonalMask.clear();
+
+    // diagonalMask.beginFill(0x8bc5ff, 0.4);
+    // diagonalMask.moveTo(0, 0);
+    // diagonalMask.lineTo(BUILDER_WIDTH, 0);
+    // diagonalMask.lineTo(0, BUILDER_HEIGHT);
+    // diagonalMask.lineTo(0, 0);
+
+    // Reverse diagonal line but consider using PIXI pivot
+    // diagonalMask.scale.x = -1;
+    // diagonalMask.x = diagonalMask.x + BUILDER_WIDTH - 1;
+
+    // diagonalMask.rotation = 0.1;
+
+    // Let's try a semi circle just for fun
+    semicircle = new PIXI.Graphics();
+    semicircle.beginFill(0xff0000);
+    semicircle.lineStyle(2, 0xffffff);
+    semicircle.arc(0, 0, BUILDER_WIDTH, 0, Math.PI); // cx, cy, radius, startAngle, endAngle
+    semicircle.x = BUILDER_WIDTH / 2;
+    semicircle.y = BUILDER_HEIGHT / 2;
+    semicircle.rotation = Math.atan(BUILDER_HEIGHT / BUILDER_WIDTH)
+    app.stage.addChild(semicircle);
+
+    this.topImage.mask = semicircle;
+
+    console.log(Math.atan(1 / 1))
   }
 
   handleImage = image => {
@@ -98,18 +121,13 @@ export default class TwoDiagonal extends React.Component {
     }
 
     // Start the animation loop
-    // app.ticker.add(delta => this.animationLoop(delta));
+    app.ticker.add(delta => this.animationLoop(delta));
   };
 
-  // Use this if we require animations perhaps
+  // Use this if we require PIXI animations
   animationLoop = delta => {
-    // if (this.updateLink) {
-    //   app.render();
-    //   this.download.setAttribute(
-    //     'href',
-    //     app.renderer.view.toDataURL('image/jpeg', 0.5)
-    //   );
-    // }
+    // diagonalMask.rotation += 0.01 * delta;
+    // semicircle.rotation += 0.01 * delta;
   };
 
   // Pass a sprite to this to enable dragging
@@ -151,9 +169,6 @@ export default class TwoDiagonal extends React.Component {
 
   onDragMove() {
     if (this.dragging) {
-      let oldPositionX = this.x;
-      let oldPositionY = this.y;
-
       var newPosition = this.data.getLocalPosition(this.parent);
       this.x = newPosition.x - this.dragPoint.x;
       this.y = newPosition.y - this.dragPoint.y;
@@ -163,8 +178,10 @@ export default class TwoDiagonal extends React.Component {
       // Keep image within stage bounds
       if (this.x > 0) this.x = 0;
       if (this.y > 0) this.y = 0;
-      if (bounds.x + bounds.width < BUILDER_WIDTH) this.x = -(bounds.width - BUILDER_WIDTH);
-      if (bounds.y + bounds.height < BUILDER_HEIGHT) this.y = -(bounds.height - BUILDER_HEIGHT);
+      if (bounds.x + bounds.width < BUILDER_WIDTH)
+        this.x = -(bounds.width - BUILDER_WIDTH);
+      if (bounds.y + bounds.height < BUILDER_HEIGHT)
+        this.y = -(bounds.height - BUILDER_HEIGHT);
     }
   }
 
@@ -180,9 +197,10 @@ export default class TwoDiagonal extends React.Component {
             ref={el => (this.download = el)}
             onClick={event => {
               event.preventDefault();
-              var a = document.createElement('a');
+              let a = document.createElement('a');
               document.body.append(a);
-              a.download = 'download.jpg';
+              let d = new Date();
+              a.download = `download-${d.getTime()}.jpg`;
               a.href = app.renderer.view.toDataURL('image/jpeg', 0.5);
               a.click();
               a.remove();
