@@ -6,29 +6,33 @@ import ImageLoader from '../ImageLoader';
 
 import { removeHash } from '../../helpers';
 
-const DEFAULT_RENDERER_WIDTH = 800;
-const DEFAULT_RENDERER_HEIGHT = 600;
-const WIDTH_HEIGTH_RATIO = DEFAULT_RENDERER_WIDTH / DEFAULT_RENDERER_HEIGHT;
+const BUILDER_WIDTH = 640;
+const BUILDER_HEIGHT = 480;
 
 let app; // Will be the PIXI app
-let that; // To access class from within event functions
+let that; // To access class from within anonymous event functions
 
 export default class TwoDiagonal extends React.Component {
   state = {
-    imagesLoaded: 0
+    imageIndex: 0
   };
 
   topImage = new PIXI.Sprite(PIXI.Texture.EMPTY);
-  // sprite2 = new PIXI.Sprite(PIXI.Texture.EMPTY);
+  bottomImage = new PIXI.Sprite(PIXI.Texture.EMPTY);
 
-  updateLink = false;
+  // updateLink = false;
 
   componentDidMount() {
     that = this;
-    app = new PIXI.Application({ backgroundColor: 0xeeeeee });
+    app = new PIXI.Application({
+      backgroundColor: 0xeeeeee,
+      preserveDrawingBuffer: true,
+      antialias: true
+    });
     app.renderer.autoResize = true;
-    app.renderer.resize(DEFAULT_RENDERER_WIDTH, DEFAULT_RENDERER_HEIGHT); // Default: 800 x 600
+    app.renderer.resize(BUILDER_WIDTH, BUILDER_HEIGHT); // Default: 800 x 600
     this.composer.appendChild(app.view);
+    app.stage.addChild(this.bottomImage);
     app.stage.addChild(this.topImage);
     // this.topImage.anchor.set(0.5);
     // app.stage.addChild(this.sprite2);
@@ -36,6 +40,25 @@ export default class TwoDiagonal extends React.Component {
     // this.topImage.interactive = true;
 
     this.draggify(this.topImage);
+    this.draggify(this.bottomImage);
+
+    var thing = new PIXI.Graphics();
+    app.stage.addChild(thing);
+    thing.x = 0;
+    app.screen.width / 2;
+    thing.y = 0;
+    app.screen.height / 2;
+    thing.lineStyle(0);
+
+    this.topImage.mask = thing;
+
+    thing.clear();
+
+    thing.beginFill(0x8bc5ff, 0.4);
+    thing.moveTo(0, 0);
+    thing.lineTo(BUILDER_WIDTH, 0);
+    thing.lineTo(0, BUILDER_HEIGHT);
+    thing.lineTo(0, 0);
   }
 
   handleImage = (image, imageIndex) => {
@@ -51,11 +74,47 @@ export default class TwoDiagonal extends React.Component {
   };
 
   process = texture => {
-    this.topImage.texture = texture;
+    if (this.state.imageIndex === 0) {
+      const { width, height } = texture;
+      const textureRatio = width / height;
+      console.log(textureRatio);
 
-    app.ticker.add(delta => this.animationLoop(delta));
+      const heightRatio = BUILDER_HEIGHT / height;
+      const widthRatio = BUILDER_WIDTH / width;
 
-    this.updateLink = true;
+      console.log(heightRatio, widthRatio);
+
+      if (textureRatio > 1) this.topImage.scale.set(heightRatio, heightRatio);
+      else this.topImage.scale.set(widthRatio, widthRatio);
+
+      // Load the texture into the sprite
+      this.topImage.texture = texture;
+      this.setState({ imageIndex: 1 });
+    } else if (this.state.imageIndex === 1) {
+      const { width, height } = texture;
+      const textureRatio = width / height;
+      console.log(textureRatio);
+
+      const heightRatio = BUILDER_HEIGHT / height;
+      const widthRatio = BUILDER_WIDTH / width;
+
+      console.log(heightRatio, widthRatio);
+
+      if (textureRatio > 1)
+        this.bottomImage.scale.set(heightRatio, heightRatio);
+      else this.bottomImage.scale.set(widthRatio, widthRatio);
+
+      // Load the texture into the sprite
+      this.bottomImage.texture = texture;
+
+      this.setState({ imageIndex: 0 });
+    }
+
+    // Start the animation loop
+    // app.ticker.add(delta => this.animationLoop(delta));
+
+    // Update the download link
+    // this.updateLink = true;
 
     // Wait a bit because apparently PIXI renders asynchronously
     // setTimeout(() => {
@@ -69,34 +128,24 @@ export default class TwoDiagonal extends React.Component {
     // this.sprite.texture = texture;
 
     // let ratio = 1;
-    // let rendererWidth = DEFAULT_RENDERER_WIDTH;
-    // let rendererHeight = DEFAULT_RENDERER_HEIGHT;
+    // let rendererWidth = BUILDER_WIDTH;
+    // let rendererHeight = BUILDER_HEIGHT;
 
     // app.renderer.resize(rendererWidth, rendererHeight);
 
-    // if (width > DEFAULT_RENDERER_WIDTH || height > DEFAULT_RENDERER_HEIGHT) {
+    // if (width > BUILDER_WIDTH || height > BUILDER_HEIGHT) {
     //   const temp = height * WIDTH_HEIGTH_RATIO;
 
     //   if (temp > width) {
-    //     ratio = DEFAULT_RENDERER_HEIGHT / height;
-    //     rendererWidth = (DEFAULT_RENDERER_WIDTH * width) / temp;
+    //     ratio = BUILDER_HEIGHT / height;
+    //     rendererWidth = (BUILDER_WIDTH * width) / temp;
     //   } else {
-    //     ratio = DEFAULT_RENDERER_WIDTH / width;
-    //     rendererHeight = DEFAULT_RENDERER_HEIGHT / (width / temp);
+    //     ratio = BUILDER_WIDTH / width;
+    //     rendererHeight = BUILDER_HEIGHT / (width / temp);
     //   }
     // } else {
     //   rendererWidth = width < rendererWidth ? width : rendererWidth;
     //   rendererHeight = height < rendererHeight ? height : rendererHeight;
-    // }
-
-    // if (this.state.imagesLoaded === 0) {
-    //   this.topImage.texture = texture;
-    //   // this.sprite.scale.set(ratio, ratio);
-    //   this.setState({ imagesLoaded: 1 });
-    // } else if (this.state.imagesLoaded === 1) {
-    //   this.sprite2.texture = texture;
-    //   // this.sprite2.scale.set(ratio, ratio);
-    //   this.setState({ imagesLoaded: 0 });
     // }
 
     // this.node.style.width = rendererWidth + 'px';
@@ -108,17 +157,19 @@ export default class TwoDiagonal extends React.Component {
     // this.needUpdateDownloadLink = true;
   };
 
+  // Use this if we require animations perhaps
   animationLoop = delta => {
-    // this.topImage.y += 0.1;
-
-    if (this.updateLink) {
-      app.render();
-      this.download.setAttribute('href', app.renderer.view.toDataURL());
-      this.updateLink = false;
-    }
+    // if (this.updateLink) {
+    //   app.render();
+    //   this.download.setAttribute(
+    //     'href',
+    //     app.renderer.view.toDataURL('image/jpeg', 0.5)
+    //   );
+    // }
   };
 
-  draggify = (obj) => {
+  // Pass a sprite to this to enable dragging
+  draggify = obj => {
     obj.interactive = true;
     obj.buttonMode = true;
     obj
@@ -130,7 +181,7 @@ export default class TwoDiagonal extends React.Component {
       .on('touchendoutside', this.onDragEnd)
       .on('mousemove', this.onDragMove)
       .on('touchmove', this.onDragMove);
-  }
+  };
 
   onDragStart(event) {
     if (!this.dragging) {
@@ -138,7 +189,7 @@ export default class TwoDiagonal extends React.Component {
       this.oldGroup = this.parentGroup;
       // this.parentGroup = dragGroup;
       this.dragging = true;
-  
+
       // this.scale.x *= 1.1;
       // this.scale.y *= 1.1;
       this.dragPoint = event.data.getLocalPosition(this.parent);
@@ -147,7 +198,7 @@ export default class TwoDiagonal extends React.Component {
     }
   }
 
-   onDragEnd() {
+  onDragEnd() {
     if (this.dragging) {
       this.dragging = false;
       this.parentGroup = this.oldGroup;
@@ -155,20 +206,19 @@ export default class TwoDiagonal extends React.Component {
       // this.scale.y /= 1.1;
       // set the interaction data to null
       this.data = null;
-      
+
       // Render out new position to download
-      that.updateLink = true;
+      // that.updateLink = true;
     }
   }
-  
-   onDragMove() {
+
+  onDragMove() {
     if (this.dragging) {
       var newPosition = this.data.getLocalPosition(this.parent);
       this.x = newPosition.x - this.dragPoint.x;
       this.y = newPosition.y - this.dragPoint.y;
     }
   }
-  
 
   render() {
     return (
@@ -180,8 +230,15 @@ export default class TwoDiagonal extends React.Component {
           <a
             href="#two-diagonal"
             ref={el => (this.download = el)}
-            download="output.png"
-            onClick={event => {}}
+            onClick={event => {
+              event.preventDefault();
+              var a = document.createElement('a');
+              document.body.append(a);
+              a.download = 'download.jpg';
+              a.href = app.renderer.view.toDataURL('image/jpeg', 0.5);
+              a.click();
+              a.remove();
+            }}
           >
             Download
           </a>
@@ -203,4 +260,3 @@ export default class TwoDiagonal extends React.Component {
     );
   }
 } // End component
-
