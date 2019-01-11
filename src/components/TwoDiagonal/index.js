@@ -178,7 +178,15 @@ export default class TwoDiagonal extends React.Component {
   render() {
     return (
       <div className={styles.wrapper}>
-        <ImageLoader handleImage={this.handleImage} />
+        <ImageLoader
+          label={
+            this.state.imageIndex === 0
+              ? 'Open first image'
+              : 'Open second image'
+          }
+          handleImage={this.handleImage}
+        />
+        
         <div className={styles.image} ref={el => (this.composer = el)} />
 
         <input
@@ -217,18 +225,21 @@ export default class TwoDiagonal extends React.Component {
                 'download-' +
                 d.getFullYear() +
                 '-' +
+                // Months start at 0 for some reason
                 ('' + d.getMonth() + 1) +
                 '-' +
                 d.getDate() +
                 '-' +
+                // So we get at least 2 digits
                 (d.getHours() < 10 ? '0' + d.getHours() : d.getHours()) +
                 '.' +
                 (d.getMinutes() < 10 ? '0' + d.getMinutes() : d.getMinutes()) +
                 '.' +
                 (d.getSeconds() < 10 ? '0' + d.getSeconds() : d.getSeconds()) +
                 '.jpg';
-              // a.href = app.renderer.view.toDataURL('image/jpeg', 0.8);
-              a.href = app.renderer.extract.base64(app.stage.view)
+              a.href = app.renderer.extract
+                .canvas(app.stage.view)
+                .toDataURL('image/jpeg', 0.8);
               a.click();
               a.remove();
             }}

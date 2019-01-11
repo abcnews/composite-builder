@@ -38,7 +38,7 @@ export default class ImageLoader extends React.Component {
     return (
       <div className={styles.root}>
         <button className="button" onClick={this.handlefileDialog}>
-          Open image
+          {this.props.label || "Open image" }
         </button>
       </div>
     );
