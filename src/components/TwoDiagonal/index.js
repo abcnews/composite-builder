@@ -22,7 +22,8 @@ for (let i = 0; i < numberOfImages; i++) {
 
 export default class TwoDiagonal extends React.Component {
   state = {
-    imageIndex: 0
+    imageIndex: 0,
+    topScaleMin: 100
   };
 
   topImage = new PIXI.Sprite(PIXI.Texture.EMPTY);
@@ -75,12 +76,22 @@ export default class TwoDiagonal extends React.Component {
     const heightRatio = BUILDER_HEIGHT / height;
     const widthRatio = BUILDER_WIDTH / width;
 
-    if (textureRatio > 1)
+    if (textureRatio > 1) {
       images[this.state.imageIndex].scale.set(heightRatio, heightRatio);
-    else images[this.state.imageIndex].scale.set(widthRatio, widthRatio);
+      images[this.state.imageIndex].minScale = heightRatio;
+    } else {
+      images[this.state.imageIndex].scale.set(widthRatio, widthRatio);
+      images[this.state.imageIndex].minScale = widthRatio;
+    }
+
+    // Reposition image up top
+    images[this.state.imageIndex].x = 0;
+    images[this.state.imageIndex].y = 0;
 
     // Load the texture into the sprite
     images[this.state.imageIndex].texture = texture;
+
+    // Toggle image loader target
     if (this.state.imageIndex === 0) this.setState({ imageIndex: 1 });
     else this.setState({ imageIndex: 0 });
 
@@ -146,11 +157,51 @@ export default class TwoDiagonal extends React.Component {
     }
   }
 
+  doZoom = event => {
+    let scale = event.target.value / 100;
+    let img = event.target.id === 'topZoom' ? images[0] : images[1];
+
+    img.scale.x = img.minScale + (scale / 100 - 0.01);
+    img.scale.y = img.minScale + (scale / 100 - 0.01);
+
+    let bounds = img.getBounds();
+
+    // Keep image within stage bounds
+    if (img.x > 0) img.x = 0;
+    if (img.y > 0) img.y = 0;
+    if (img.x + bounds.width < BUILDER_WIDTH)
+      img.x = -(bounds.width - BUILDER_WIDTH);
+    if (img.y + bounds.height < BUILDER_HEIGHT)
+      img.y = -(bounds.height - BUILDER_HEIGHT);
+  };
+
   render() {
     return (
       <div className={styles.wrapper}>
         <ImageLoader handleImage={this.handleImage} />
         <div className={styles.image} ref={el => (this.composer = el)} />
+
+        <input
+          className={styles.slider}
+          id="topZoom"
+          type="range"
+          min="100"
+          max="10000"
+          step="1"
+          defaultValue="100"
+          onChange={this.doZoom}
+        />
+
+        <input
+          className={styles.slider}
+          id="bottomZoom"
+          type="range"
+          min="100"
+          max="10000"
+          step="1"
+          defaultValue="100"
+          onChange={this.doZoom}
+        />
 
         <p>
           <a
@@ -161,8 +212,23 @@ export default class TwoDiagonal extends React.Component {
               let a = document.createElement('a');
               document.body.append(a);
               let d = new Date();
-              a.download = `download-${d.getTime()}.jpg`;
-              a.href = app.renderer.view.toDataURL('image/jpeg', 0.5);
+              // Set the filename to current time
+              a.download =
+                'download-' +
+                d.getFullYear() +
+                '-' +
+                ('' + d.getMonth() + 1) +
+                '-' +
+                d.getDate() +
+                '-' +
+                (d.getHours() < 10 ? '0' + d.getHours() : d.getHours()) +
+                '.' +
+                (d.getMinutes() < 10 ? '0' + d.getMinutes() : d.getMinutes()) +
+                '.' +
+                (d.getSeconds() < 10 ? '0' + d.getSeconds() : d.getSeconds()) +
+                '.jpg';
+              // a.href = app.renderer.view.toDataURL('image/jpeg', 0.8);
+              a.href = app.renderer.extract.base64(app.stage.view)
               a.click();
               a.remove();
             }}
