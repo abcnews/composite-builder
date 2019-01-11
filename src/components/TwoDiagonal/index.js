@@ -1,17 +1,24 @@
 import React from 'react';
 import styles from './styles.scss';
 import * as PIXI from 'pixi.js';
+PIXI.utils.skipHello(); // Remove PIXI console ad
 
 import ImageLoader from '../ImageLoader';
 
 import { removeHash } from '../../helpers';
 
-const BUILDER_WIDTH = 640;
-const BUILDER_HEIGHT = 480;
+const BUILDER_WIDTH = 800;
+const BUILDER_HEIGHT = 600;
 
 let app; // Will be the PIXI app
-let diagonalMask;
-let semicircle;
+let semicircle; // Will be our mask
+
+// Set up the sprite images
+let images = [];
+const numberOfImages = 2;
+for (let i = 0; i < numberOfImages; i++) {
+  images[i] = new PIXI.Sprite(PIXI.Texture.EMPTY);
+}
 
 export default class TwoDiagonal extends React.Component {
   state = {
@@ -30,51 +37,23 @@ export default class TwoDiagonal extends React.Component {
     app.renderer.autoResize = true;
     app.renderer.resize(BUILDER_WIDTH, BUILDER_HEIGHT); // Default: 800 x 600
     this.composer.appendChild(app.view);
-    app.stage.addChild(this.bottomImage);
-    app.stage.addChild(this.topImage);
+    app.stage.addChild(images[1]);
+    app.stage.addChild(images[0]);
 
-    this.draggify(this.topImage);
-    this.draggify(this.bottomImage);
-
-    // Add a mask to the stage PS: we are using a semi circle mask now
-    // diagonalMask = new PIXI.Graphics();
-    // // app.stage.addChild(diagonalMask);
-    // diagonalMask.x = BUILDER_WIDTH / 2;
-    // diagonalMask.y = BUILDER_HEIGHT / 2;
-    // diagonalMask.lineStyle(0);
-
-    // // this.topImage.mask = diagonalMask;
-
-    // diagonalMask.pivot.x = BUILDER_WIDTH / 2;
-    // diagonalMask.pivot.y = BUILDER_HEIGHT / 2;
-
-    // diagonalMask.clear();
-
-    // diagonalMask.beginFill(0x8bc5ff, 0.4);
-    // diagonalMask.moveTo(0, 0);
-    // diagonalMask.lineTo(BUILDER_WIDTH, 0);
-    // diagonalMask.lineTo(0, BUILDER_HEIGHT);
-    // diagonalMask.lineTo(0, 0);
-
-    // Reverse diagonal line but consider using PIXI pivot
-    // diagonalMask.scale.x = -1;
-    // diagonalMask.x = diagonalMask.x + BUILDER_WIDTH - 1;
-
-    // diagonalMask.rotation = 0.1;
+    this.draggify(images[0]);
+    this.draggify(images[1]);
 
     // Let's try a semi circle just for fun
     semicircle = new PIXI.Graphics();
     semicircle.beginFill(0xff0000);
-    semicircle.lineStyle(2, 0xffffff);
+    semicircle.lineStyle(4, 0xffd900, 1);
     semicircle.arc(0, 0, BUILDER_WIDTH, 0, Math.PI); // cx, cy, radius, startAngle, endAngle
     semicircle.x = BUILDER_WIDTH / 2;
     semicircle.y = BUILDER_HEIGHT / 2;
-    semicircle.rotation = Math.atan(BUILDER_HEIGHT / BUILDER_WIDTH)
+    semicircle.rotation = Math.PI - Math.atan(BUILDER_HEIGHT / BUILDER_WIDTH);
     app.stage.addChild(semicircle);
 
-    this.topImage.mask = semicircle;
-
-    console.log(Math.atan(1 / 1))
+    images[0].mask = semicircle;
   }
 
   handleImage = image => {
@@ -90,45 +69,27 @@ export default class TwoDiagonal extends React.Component {
   };
 
   process = texture => {
-    if (this.state.imageIndex === 0) {
-      const { width, height } = texture;
-      const textureRatio = width / height;
+    const { width, height } = texture;
+    const textureRatio = width / height;
 
-      const heightRatio = BUILDER_HEIGHT / height;
-      const widthRatio = BUILDER_WIDTH / width;
+    const heightRatio = BUILDER_HEIGHT / height;
+    const widthRatio = BUILDER_WIDTH / width;
 
-      if (textureRatio > 1) this.topImage.scale.set(heightRatio, heightRatio);
-      else this.topImage.scale.set(widthRatio, widthRatio);
+    if (textureRatio > 1)
+      images[this.state.imageIndex].scale.set(heightRatio, heightRatio);
+    else images[this.state.imageIndex].scale.set(widthRatio, widthRatio);
 
-      // Load the texture into the sprite
-      this.topImage.texture = texture;
-      this.setState({ imageIndex: 1 });
-    } else if (this.state.imageIndex === 1) {
-      const { width, height } = texture;
-      const textureRatio = width / height;
-
-      const heightRatio = BUILDER_HEIGHT / height;
-      const widthRatio = BUILDER_WIDTH / width;
-
-      if (textureRatio > 1)
-        this.bottomImage.scale.set(heightRatio, heightRatio);
-      else this.bottomImage.scale.set(widthRatio, widthRatio);
-
-      // Load the texture into the sprite
-      this.bottomImage.texture = texture;
-
-      this.setState({ imageIndex: 0 });
-    }
+    // Load the texture into the sprite
+    images[this.state.imageIndex].texture = texture;
+    if (this.state.imageIndex === 0) this.setState({ imageIndex: 1 });
+    else this.setState({ imageIndex: 0 });
 
     // Start the animation loop
     app.ticker.add(delta => this.animationLoop(delta));
   };
 
   // Use this if we require PIXI animations
-  animationLoop = delta => {
-    // diagonalMask.rotation += 0.01 * delta;
-    // semicircle.rotation += 0.01 * delta;
-  };
+  animationLoop = delta => {};
 
   // Pass a sprite to this to enable dragging
   draggify = obj => {
