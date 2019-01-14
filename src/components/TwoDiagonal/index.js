@@ -7,11 +7,8 @@ import ImageLoader from '../ImageLoader';
 
 import { removeHash } from '../../helpers';
 
-const BUILDER_WIDTH = 800;
-const BUILDER_HEIGHT = 600;
-
-// let app; // Will be the PIXI app
-// let semicircle; // Will be our mask
+let BUILDER_WIDTH = 800;
+let BUILDER_HEIGHT = 600;
 
 export default class TwoDiagonal extends React.Component {
   state = {
@@ -46,8 +43,7 @@ export default class TwoDiagonal extends React.Component {
     this.draggify(this.images[0]);
     this.draggify(this.images[1]);
 
-    // Let's try a semi circle just for fun
-
+    // Let's try a semi circle
     this.semicircle.beginFill(0xff0000);
     this.semicircle.lineStyle(4, 0xffd900, 1);
     this.semicircle.arc(0, 0, BUILDER_WIDTH, 0, Math.PI); // cx, cy, radius, startAngle, endAngle
@@ -63,8 +59,7 @@ export default class TwoDiagonal extends React.Component {
     this.images[0].mask = this.semicircle;
   }
 
-  componentDidUpdate() {}
-
+  // This is usually called by the ImageLoader component
   handleImage = image => {
     const src = PIXI.loader.resources[image.src];
 
@@ -179,8 +174,8 @@ export default class TwoDiagonal extends React.Component {
       this.setState({ topScale: event.target.value });
     else this.setState({ bottomScale: event.target.value });
 
-    img.scale.x = img.minScale * scale //+ (scale / 100 - 0.01);
-    img.scale.y = img.minScale * scale //+ (scale / 100 - 0.01);
+    img.scale.x = img.minScale * scale; //+ (scale / 100 - 0.01);
+    img.scale.y = img.minScale * scale; //+ (scale / 100 - 0.01);
 
     let bounds = img.getBounds();
 
@@ -191,6 +186,35 @@ export default class TwoDiagonal extends React.Component {
       img.x = -(bounds.width - BUILDER_WIDTH);
     if (img.y + bounds.height < BUILDER_HEIGHT)
       img.y = -(bounds.height - BUILDER_HEIGHT);
+  };
+
+  handleSave = type => event => {
+    event.preventDefault();
+    let a = document.createElement('a');
+    document.body.append(a);
+    let d = new Date();
+    // Set the filename to current time
+    a.download =
+      'download-' +
+      d.getFullYear() +
+      '-' +
+      // Months start at 0 for some reason
+      ('' + d.getMonth() + 1) +
+      '-' +
+      d.getDate() +
+      '-' +
+      // So we get at least 2 digits
+      (d.getHours() < 10 ? '0' + d.getHours() : d.getHours()) +
+      '.' +
+      (d.getMinutes() < 10 ? '0' + d.getMinutes() : d.getMinutes()) +
+      '.' +
+      (d.getSeconds() < 10 ? '0' + d.getSeconds() : d.getSeconds()) +
+      (type === 'png' ? '.png' : '.jpg');
+    a.href = this.app.renderer.extract
+      .canvas(this.app.stage.view)
+      .toDataURL(type === 'png' ? 'image/png' : 'image/jpeg');
+    a.click();
+    a.remove();
   };
 
   render() {
@@ -207,64 +231,51 @@ export default class TwoDiagonal extends React.Component {
 
         <div className={styles.image} ref={el => (this.composer = el)} />
 
-        <input
-          className={styles.slider}
-          id="topZoom"
-          type="range"
-          min="100"
-          max="256"
-          step="1"
-          // defaultValue="100"
-          value={this.state.topScale}
-          onChange={this.doZoom}
-        />
+        <div className={styles.scale}>
+          Left scale
+          <br />
+          <input
+            className={styles.slider}
+            id="topZoom"
+            type="range"
+            min="100"
+            max="256"
+            step="1"
+            value={this.state.topScale}
+            onChange={this.doZoom}
+          />
+        </div>
 
-        <input
-          className={styles.slider}
-          id="bottomZoom"
-          type="range"
-          min="100"
-          max="256"
-          step="1"
-          // defaultValue="100"
-          value={this.state.bottomScale}
-          onChange={this.doZoom}
-        />
-
+        <div className={styles.scale}>
+          Right scale
+          <br />
+          <input
+            className={styles.slider}
+            id="bottomZoom"
+            type="range"
+            min="100"
+            max="256"
+            step="1"
+            value={this.state.bottomScale}
+            onChange={this.doZoom}
+          />
+        </div>
         <p>
           <a
-            href="#two-diagonal"
+            className={styles.button}
+            href="#"
             ref={el => (this.download = el)}
-            onClick={event => {
-              event.preventDefault();
-              let a = document.createElement('a');
-              document.body.append(a);
-              let d = new Date();
-              // Set the filename to current time
-              a.download =
-                'download-' +
-                d.getFullYear() +
-                '-' +
-                // Months start at 0 for some reason
-                ('' + d.getMonth() + 1) +
-                '-' +
-                d.getDate() +
-                '-' +
-                // So we get at least 2 digits
-                (d.getHours() < 10 ? '0' + d.getHours() : d.getHours()) +
-                '.' +
-                (d.getMinutes() < 10 ? '0' + d.getMinutes() : d.getMinutes()) +
-                '.' +
-                (d.getSeconds() < 10 ? '0' + d.getSeconds() : d.getSeconds()) +
-                '.jpg';
-              a.href = this.app.renderer.extract
-                .canvas(this.app.stage.view)
-                .toDataURL('image/jpeg', 0.8);
-              a.click();
-              a.remove();
-            }}
+            onClick={this.handleSave('jpg')}
           >
-            Download
+            Download JPG
+          </a>
+          <a
+            className={styles.button}
+            href="#"
+            ref={el => (this.download = el)}
+            onClick={this.handleSave('png')}
+          >
+            Download PNG
           </a>
         </p>
 
