@@ -44,6 +44,7 @@ export default class App extends React.Component {
         {this.state.view === 'layout-select' && <LayoutSelect />}
         {this.state.view === 'two-image' && <TwoImage />}
         {this.state.view === 'two-diagonal' && <TwoDiagonal />}
+        {this.state.view === 'two-diagonal-right' && <TwoDiagonal direction={"right"} />}
       </div>
     );
   }

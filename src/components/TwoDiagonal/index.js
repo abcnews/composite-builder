@@ -10,52 +10,60 @@ import { removeHash } from '../../helpers';
 const BUILDER_WIDTH = 800;
 const BUILDER_HEIGHT = 600;
 
-let app; // Will be the PIXI app
-let semicircle; // Will be our mask
-
-// Set up the sprite images
-let images = [];
-const numberOfImages = 2;
-for (let i = 0; i < numberOfImages; i++) {
-  images[i] = new PIXI.Sprite(PIXI.Texture.EMPTY);
-}
+// let app; // Will be the PIXI app
+// let semicircle; // Will be our mask
 
 export default class TwoDiagonal extends React.Component {
   state = {
     imageIndex: 0,
-    topScaleMin: 100
+    topScale: 100,
+    bottomScale: 100
   };
 
-  topImage = new PIXI.Sprite(PIXI.Texture.EMPTY);
-  bottomImage = new PIXI.Sprite(PIXI.Texture.EMPTY);
+  app = new PIXI.Application({
+    backgroundColor: 0xeeeeee,
+    preserveDrawingBuffer: true,
+    antialias: true
+  });
+
+  images = [];
+
+  semicircle = new PIXI.Graphics();
 
   componentDidMount() {
-    app = new PIXI.Application({
-      backgroundColor: 0xeeeeee,
-      preserveDrawingBuffer: true,
-      antialias: true
-    });
-    app.renderer.autoResize = true;
-    app.renderer.resize(BUILDER_WIDTH, BUILDER_HEIGHT); // Default: 800 x 600
-    this.composer.appendChild(app.view);
-    app.stage.addChild(images[1]);
-    app.stage.addChild(images[0]);
+    // Set up the sprite images
+    const numberOfImages = 2;
+    for (let i = 0; i < numberOfImages; i++) {
+      this.images[i] = new PIXI.Sprite(PIXI.Texture.EMPTY);
+    }
 
-    this.draggify(images[0]);
-    this.draggify(images[1]);
+    this.app.renderer.autoResize = true;
+    this.app.renderer.resize(BUILDER_WIDTH, BUILDER_HEIGHT); // Default: 800 x 600
+    this.composer.appendChild(this.app.view);
+    this.app.stage.addChild(this.images[1]);
+    this.app.stage.addChild(this.images[0]);
+
+    this.draggify(this.images[0]);
+    this.draggify(this.images[1]);
 
     // Let's try a semi circle just for fun
-    semicircle = new PIXI.Graphics();
-    semicircle.beginFill(0xff0000);
-    semicircle.lineStyle(4, 0xffd900, 1);
-    semicircle.arc(0, 0, BUILDER_WIDTH, 0, Math.PI); // cx, cy, radius, startAngle, endAngle
-    semicircle.x = BUILDER_WIDTH / 2;
-    semicircle.y = BUILDER_HEIGHT / 2;
-    semicircle.rotation = Math.PI - Math.atan(BUILDER_HEIGHT / BUILDER_WIDTH);
-    app.stage.addChild(semicircle);
 
-    images[0].mask = semicircle;
+    this.semicircle.beginFill(0xff0000);
+    this.semicircle.lineStyle(4, 0xffd900, 1);
+    this.semicircle.arc(0, 0, BUILDER_WIDTH, 0, Math.PI); // cx, cy, radius, startAngle, endAngle
+    this.semicircle.x = BUILDER_WIDTH / 2;
+    this.semicircle.y = BUILDER_HEIGHT / 2;
+    // Handle different diagonal layouts
+    this.semicircle.rotation =
+      this.props.direction === 'left'
+        ? Math.PI - Math.atan(BUILDER_HEIGHT / BUILDER_WIDTH)
+        : Math.atan(BUILDER_HEIGHT / BUILDER_WIDTH);
+    this.app.stage.addChild(this.semicircle);
+
+    this.images[0].mask = this.semicircle;
   }
+
+  componentDidUpdate() {}
 
   handleImage = image => {
     const src = PIXI.loader.resources[image.src];
@@ -76,27 +84,32 @@ export default class TwoDiagonal extends React.Component {
     const heightRatio = BUILDER_HEIGHT / height;
     const widthRatio = BUILDER_WIDTH / width;
 
+    // Scale image so it fits on stage
     if (textureRatio > 1) {
-      images[this.state.imageIndex].scale.set(heightRatio, heightRatio);
-      images[this.state.imageIndex].minScale = heightRatio;
+      this.images[this.state.imageIndex].scale.set(heightRatio, heightRatio);
+      this.images[this.state.imageIndex].minScale = heightRatio;
     } else {
-      images[this.state.imageIndex].scale.set(widthRatio, widthRatio);
-      images[this.state.imageIndex].minScale = widthRatio;
+      this.images[this.state.imageIndex].scale.set(widthRatio, widthRatio);
+      this.images[this.state.imageIndex].minScale = widthRatio;
     }
 
+    // Reset our sliders to zero
+    if (this.state.imageIndex === 0) this.setState({ topScale: 100 });
+    else this.setState({ bottomScale: 100 });
+
     // Reposition image up top
-    images[this.state.imageIndex].x = 0;
-    images[this.state.imageIndex].y = 0;
+    this.images[this.state.imageIndex].x = 0;
+    this.images[this.state.imageIndex].y = 0;
 
     // Load the texture into the sprite
-    images[this.state.imageIndex].texture = texture;
+    this.images[this.state.imageIndex].texture = texture;
 
     // Toggle image loader target
     if (this.state.imageIndex === 0) this.setState({ imageIndex: 1 });
     else this.setState({ imageIndex: 0 });
 
     // Start the animation loop
-    app.ticker.add(delta => this.animationLoop(delta));
+    this.app.ticker.add(delta => this.animationLoop(delta));
   };
 
   // Use this if we require PIXI animations
@@ -159,10 +172,15 @@ export default class TwoDiagonal extends React.Component {
 
   doZoom = event => {
     let scale = event.target.value / 100;
-    let img = event.target.id === 'topZoom' ? images[0] : images[1];
+    let img = event.target.id === 'topZoom' ? this.images[0] : this.images[1];
 
-    img.scale.x = img.minScale + (scale / 100 - 0.01);
-    img.scale.y = img.minScale + (scale / 100 - 0.01);
+    // Update state so we can zero scale on image reload
+    if (event.target.id === 'topZoom')
+      this.setState({ topScale: event.target.value });
+    else this.setState({ bottomScale: event.target.value });
+
+    img.scale.x = img.minScale * scale //+ (scale / 100 - 0.01);
+    img.scale.y = img.minScale * scale //+ (scale / 100 - 0.01);
 
     let bounds = img.getBounds();
 
@@ -186,7 +204,7 @@ export default class TwoDiagonal extends React.Component {
           }
           handleImage={this.handleImage}
         />
-        
+
         <div className={styles.image} ref={el => (this.composer = el)} />
 
         <input
@@ -194,9 +212,10 @@ export default class TwoDiagonal extends React.Component {
           id="topZoom"
           type="range"
           min="100"
-          max="10000"
+          max="256"
           step="1"
-          defaultValue="100"
+          // defaultValue="100"
+          value={this.state.topScale}
           onChange={this.doZoom}
         />
 
@@ -205,9 +224,10 @@ export default class TwoDiagonal extends React.Component {
           id="bottomZoom"
           type="range"
           min="100"
-          max="10000"
+          max="256"
           step="1"
-          defaultValue="100"
+          // defaultValue="100"
+          value={this.state.bottomScale}
           onChange={this.doZoom}
         />
 
@@ -237,8 +257,8 @@ export default class TwoDiagonal extends React.Component {
                 '.' +
                 (d.getSeconds() < 10 ? '0' + d.getSeconds() : d.getSeconds()) +
                 '.jpg';
-              a.href = app.renderer.extract
-                .canvas(app.stage.view)
+              a.href = this.app.renderer.extract
+                .canvas(this.app.stage.view)
                 .toDataURL('image/jpeg', 0.8);
               a.click();
               a.remove();
@@ -264,3 +284,7 @@ export default class TwoDiagonal extends React.Component {
     );
   }
 } // End component
+
+TwoDiagonal.defaultProps = {
+  direction: 'left'
+};
