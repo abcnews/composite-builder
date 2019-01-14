@@ -28,6 +28,10 @@ export default class TwoDiagonal extends React.Component {
   semicircle = new PIXI.Graphics();
 
   componentDidMount() {
+    // Hackish way of accessing these in drag events
+    BUILDER_WIDTH = this.props.builderWidth;
+    BUILDER_HEIGHT = this.props.builderHeight;
+
     // Set up the sprite images
     const numberOfImages = 2;
     for (let i = 0; i < numberOfImages; i++) {
@@ -35,7 +39,7 @@ export default class TwoDiagonal extends React.Component {
     }
 
     this.app.renderer.autoResize = true;
-    this.app.renderer.resize(BUILDER_WIDTH, BUILDER_HEIGHT); // Default: 800 x 600
+    this.app.renderer.resize(this.props.builderWidth, this.props.builderHeight); // Default: 800 x 600
     this.composer.appendChild(this.app.view);
     this.app.stage.addChild(this.images[1]);
     this.app.stage.addChild(this.images[0]);
@@ -46,15 +50,16 @@ export default class TwoDiagonal extends React.Component {
     // Let's try a semi circle
     this.semicircle.beginFill(0xff0000);
     this.semicircle.lineStyle(4, 0xffd900, 1);
-    this.semicircle.arc(0, 0, BUILDER_WIDTH, 0, Math.PI); // cx, cy, radius, startAngle, endAngle
-    this.semicircle.x = BUILDER_WIDTH / 2;
-    this.semicircle.y = BUILDER_HEIGHT / 2;
+    this.semicircle.arc(0, 0, this.props.builderWidth, 0, Math.PI); // cx, cy, radius, startAngle, endAngle
+    this.semicircle.x = this.props.builderWidth / 2;
+    this.semicircle.y = this.props.builderHeight / 2;
 
     // Handle different diagonal layouts depending on props
     this.semicircle.rotation =
       this.props.direction === 'left'
-        ? Math.PI - Math.atan(BUILDER_HEIGHT / BUILDER_WIDTH)
-        : Math.atan(BUILDER_HEIGHT / BUILDER_WIDTH);
+        ? Math.PI -
+          Math.atan(this.props.builderHeight / this.props.builderWidth)
+        : Math.atan(this.props.builderHeight / this.props.builderWidth);
     this.app.stage.addChild(this.semicircle);
 
     this.images[0].mask = this.semicircle;
@@ -76,10 +81,10 @@ export default class TwoDiagonal extends React.Component {
   process = texture => {
     const { width, height } = texture;
     const textureRatio = width / height;
-    const builderRatio = BUILDER_WIDTH / BUILDER_HEIGHT;
+    const builderRatio = this.props.builderWidth / this.props.builderHeight;
 
-    const heightRatio = BUILDER_HEIGHT / height;
-    const widthRatio = BUILDER_WIDTH / width;
+    const heightRatio = this.props.builderHeight / height;
+    const widthRatio = this.props.builderWidth / width;
 
     // Scale image so it fits on stage
     if (textureRatio > builderRatio) {
@@ -184,10 +189,10 @@ export default class TwoDiagonal extends React.Component {
     // Keep image within stage bounds
     if (img.x > 0) img.x = 0;
     if (img.y > 0) img.y = 0;
-    if (img.x + bounds.width < BUILDER_WIDTH)
-      img.x = -(bounds.width - BUILDER_WIDTH);
-    if (img.y + bounds.height < BUILDER_HEIGHT)
-      img.y = -(bounds.height - BUILDER_HEIGHT);
+    if (img.x + bounds.width < this.props.builderWidth)
+      img.x = -(bounds.width - this.props.builderWidth);
+    if (img.y + bounds.height < this.props.builderHeight)
+      img.y = -(bounds.height - this.props.builderHeight);
   };
 
   handleSave = type => event => {
@@ -241,7 +246,7 @@ export default class TwoDiagonal extends React.Component {
             id="topZoom"
             type="range"
             min="100"
-            max="256"
+            max={this.props.maxZoom}
             step="1"
             value={this.state.topScale}
             onChange={this.doZoom}
@@ -256,7 +261,7 @@ export default class TwoDiagonal extends React.Component {
             id="bottomZoom"
             type="range"
             min="100"
-            max="256"
+            max={this.props.maxZoom}
             step="1"
             value={this.state.bottomScale}
             onChange={this.doZoom}
@@ -299,5 +304,8 @@ export default class TwoDiagonal extends React.Component {
 } // End component
 
 TwoDiagonal.defaultProps = {
-  direction: 'left'
+  direction: 'left',
+  builderWidth: BUILDER_WIDTH,
+  builderHeight: BUILDER_HEIGHT,
+  maxZoom: 250
 };
