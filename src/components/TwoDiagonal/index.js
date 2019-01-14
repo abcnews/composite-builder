@@ -49,7 +49,8 @@ export default class TwoDiagonal extends React.Component {
     this.semicircle.arc(0, 0, BUILDER_WIDTH, 0, Math.PI); // cx, cy, radius, startAngle, endAngle
     this.semicircle.x = BUILDER_WIDTH / 2;
     this.semicircle.y = BUILDER_HEIGHT / 2;
-    // Handle different diagonal layouts
+
+    // Handle different diagonal layouts depending on props
     this.semicircle.rotation =
       this.props.direction === 'left'
         ? Math.PI - Math.atan(BUILDER_HEIGHT / BUILDER_WIDTH)
@@ -75,12 +76,13 @@ export default class TwoDiagonal extends React.Component {
   process = texture => {
     const { width, height } = texture;
     const textureRatio = width / height;
+    const builderRatio = BUILDER_WIDTH / BUILDER_HEIGHT;
 
     const heightRatio = BUILDER_HEIGHT / height;
     const widthRatio = BUILDER_WIDTH / width;
 
     // Scale image so it fits on stage
-    if (textureRatio > 1) {
+    if (textureRatio > builderRatio) {
       this.images[this.state.imageIndex].scale.set(heightRatio, heightRatio);
       this.images[this.state.imageIndex].minScale = heightRatio;
     } else {
