@@ -15,12 +15,14 @@
   },
   "dependencies": {
     "color": "^0.11.3",
+    "detect-browser": "^4.0.3",
     "file-dialog": "^0.0.7",
     "get-image-pixels": "^1.0.0",
     "get-rgba-palette": "^2.0.0",
     "mercury": "^14.0.0",
     "observify": "^1.0.2",
     "pixi.js": "^4.8.5",
+    "promise-polyfill": "8.1.0",
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
     "regenerator": "^0.13.3"
