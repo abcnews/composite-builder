@@ -1,0 +1,42 @@
+.wrapper {
+  margin: 20px;
+  text-align: center;
+}
+
+.image {
+  margin: 30px;
+}
+
+.slider {
+  width: 300px;
+}
+
+.scale {
+  display: inline-block;
+  margin: 0 10px;
+}
+
+a.button {
+  display: inline-block;
+  padding: 0.45em 1.3em 0.28em 1.3em;
+  border: 0.1em solid #222;
+  margin: 0 0.5em 0.5em 0;
+  border-radius: 5px;
+  box-sizing: border-box;
+  text-decoration: none;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 300;
+  color: #222;
+  text-align: center;
+  transition: all 0.05s;
+}
+a.button:hover {
+  color: white;
+  background-color: #222;
+}
+@media all and (max-width: 30em) {
+  a.button {
+    display: block;
+    margin: 0.4em auto;
+  }
+}

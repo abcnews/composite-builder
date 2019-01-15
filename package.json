@@ -9,19 +9,25 @@
     "Joshua Byrd <byrd.joshua@abc.net.au>"
   ],
   "scripts": {
-    "start": "aunty serve"
+    "start": "aunty serve",
+    "build": "aunty build",
+    "surge": "NODE_ENV=surge aunty build  && surge docs composite-builder-dev.surge.sh"
   },
   "dependencies": {
     "color": "^0.11.3",
+    "file-dialog": "^0.0.7",
     "get-image-pixels": "^1.0.0",
     "get-rgba-palette": "^2.0.0",
     "mercury": "^14.0.0",
     "observify": "^1.0.2",
+    "pixi.js": "^4.8.5",
     "react": "^16.7.0",
-    "react-dom": "^16.7.0"
+    "react-dom": "^16.7.0",
+    "regenerator": "^0.13.3"
   },
   "devDependencies": {
-    "@abcnews/aunty": "^9.8.2",
+    "@abcnews/aunty": "^9.11.0",
+    "@babel/plugin-proposal-class-properties": "^7.2.3",
     "react-test-renderer": "^16.7.0"
   },
   "prettier": {
