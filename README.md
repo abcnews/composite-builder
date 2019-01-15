@@ -2,6 +2,10 @@
 
 A tool for building composite graphics.
 
+## Developing
+
+Clone this project and use [Aunty](https://github.com/abcnews/aunty) to run a local server using `aunty serve`. 
+
 ## Releasing
 
 The Composite Builder is now hosted on [GitHub Pages](https://abcnews.github.io/composite-builder/), so don't use aunty's `deploy` or `release` commands. Instead, do the following:
