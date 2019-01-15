@@ -1,12 +1,15 @@
-# composite-builder
+Composite Builder
+=================
 
 A tool for building composite graphics.
 
-## Developing
+Developing
+----------
 
 Clone this project and use [Aunty](https://github.com/abcnews/aunty) to run a local server using `aunty serve`. 
 
-## Releasing
+Releasing
+---------
 
 The Composite Builder is now hosted on [GitHub Pages](https://abcnews.github.io/composite-builder/), so don't use aunty's `deploy` or `release` commands. Instead, do the following:
 
@@ -15,7 +18,8 @@ The Composite Builder is now hosted on [GitHub Pages](https://abcnews.github.io/
 3. Bump the major/minor/patch version with `npm version {major|minor|patch}`
 4. Push everything to to GitHub with `git push --all && git push --tags`
 
-## Authors
+Authors
+-------
 
 - Colin Gourlay ([gourlay.colin@abc.net.au](mailto:gourlay.colin@abc.net.au))
 - Joshua Byrd ([byrd.joshua@abc.net.au](mailto:byrd.joshua@abc.net.au))
