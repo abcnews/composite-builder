@@ -1,7 +1,8 @@
 import React from 'react';
 import styles from './styles.scss';
 import * as PIXI from 'pixi.js';
-PIXI.utils.skipHello(); // Remove PIXI console ad
+const { detect } = require('detect-browser');
+const browser = detect();
 
 import ImageLoader from '../ImageLoader';
 
@@ -197,11 +198,10 @@ export default class TwoDiagonal extends React.Component {
 
   handleSave = type => event => {
     event.preventDefault();
-    let a = document.createElement('a');
-    document.body.append(a);
+
+    // Generate a filename
     let d = new Date();
-    // Set the filename to current time
-    a.download =
+    let filename =
       'download-' +
       d.getFullYear() +
       '-' +
@@ -217,11 +217,28 @@ export default class TwoDiagonal extends React.Component {
       '.' +
       (d.getSeconds() < 10 ? '0' + d.getSeconds() : d.getSeconds()) +
       (type === 'png' ? '.png' : '.jpg');
-    a.href = this.app.renderer.extract
-      .canvas(this.app.stage.view)
-      .toDataURL(type === 'png' ? 'image/png' : 'image/jpeg');
-    a.click();
-    a.remove();
+
+    // Work out if we want to png or jpeg
+    let encoding = type === 'png' ? 'image/png' : 'image/jpeg';
+
+    // Detect if we are on a Microsoft browser or not
+    if (browser.name === 'edge' || browser.name === 'ie') {
+      this.app.renderer.view.toBlob(blob => {
+        console.log(blob);
+        window.navigator.msSaveOrOpenBlob(blob, filename);
+      }, encoding);
+    } else {
+      let a = document.createElement('a');
+      document.body.appendChild(a);
+
+      // Set the filename to current time
+      a.download = filename;
+      a.href = this.app.renderer.extract
+        .canvas(this.app.stage.view)
+        .toDataURL(encoding);
+      a.click();
+      a.remove();
+    }
   };
 
   render() {
