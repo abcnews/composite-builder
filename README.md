@@ -1,7 +1,7 @@
 Composite Builder
 =================
 
-A tool for building composite graphics.
+A tool for building composite graphics. https://abcnews.github.io/composite-builder/
 
 Developing
 ----------
