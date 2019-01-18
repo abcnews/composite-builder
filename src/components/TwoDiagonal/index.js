@@ -12,6 +12,8 @@ let BUILDER_HEIGHT = 600;
 
 export default class TwoDiagonal extends React.Component {
   state = {
+    width: this.props.builderWidth,
+    height: this.props.builderHeight,
     imageIndex: 0,
     topScale: 100,
     bottomScale: 100

@@ -49,6 +49,7 @@ export default class LayoutSelect extends React.Component {
           </a>
           <br /><strong>Diagonal (inverse)</strong>
         </div>
+        <div className={styles.footer}><a href="https://github.com/abcnews/composite-builder/issues">Feedback / Ideas?</a></div>
       </div>
     );
   }
