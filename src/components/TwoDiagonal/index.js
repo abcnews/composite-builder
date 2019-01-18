@@ -253,7 +253,22 @@ export default class TwoDiagonal extends React.Component {
           handleImage={this.handleImage}
         />
 
-        <div className={styles.composer} ref={el => (this.composer = el)} />
+        <div
+          className={styles.composer}
+          ref={el => (this.composer = el)}
+          onDoubleClick={event => {
+            let canvasTop = this.app.renderer.view.offsetTop;
+            let canvasLeft = this.app.renderer.view.offsetLeft;
+            let clickX = event.clientX;
+            let clickY = event.clientY;
+            let topOffset = window.pageYOffset;
+            let clickCanvasX = clickX - canvasLeft;
+            let clickCanvasY = clickY - canvasTop;
+            console.log(clickX, clickY);
+            console.log(canvasLeft, canvasTop);
+            console.log(clickCanvasX, clickCanvasY);
+          }}
+        />
 
         <div className={styles.scale}>
           Left scale
