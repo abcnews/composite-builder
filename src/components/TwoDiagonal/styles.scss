@@ -4,7 +4,12 @@
 }
 
 .composer {
-  margin: 30px;
+  margin: 20px auto 30px;
+
+  canvas {
+    // Remove white space at bottom
+    vertical-align: middle;
+  }
 }
 
 .slider {

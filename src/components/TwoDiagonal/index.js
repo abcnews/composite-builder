@@ -1,10 +1,9 @@
 import React from 'react';
 import styles from './styles.scss';
 import * as PIXI from 'pixi.js';
+import fileDialog from 'file-dialog';
 const { detect } = require('detect-browser');
 const browser = detect();
-
-import ImageLoader from '../ImageLoader';
 
 import { removeHash } from '../../helpers';
 
@@ -27,6 +26,7 @@ export default class TwoDiagonal extends React.Component {
   images = [];
 
   semicircle = new PIXI.Graphics();
+  maskPlaceholder = new PIXI.Graphics();
 
   componentDidMount() {
     // Hackish way of accessing these in drag events
@@ -41,8 +41,28 @@ export default class TwoDiagonal extends React.Component {
 
     this.app.renderer.autoResize = true;
     this.app.renderer.resize(this.props.builderWidth, this.props.builderHeight); // Default: 800 x 600
-    this.composer.appendChild(this.app.view);
+    this.composer.appendChild(this.app.view); // Attach PIXI app
+    this.composer.style.width = this.props.builderWidth + 'px'; // Wrap container tightly
     this.app.stage.addChild(this.images[1]);
+
+    // Use a placeholder for image 0
+    this.maskPlaceholder.beginFill(0xcccccc);
+    this.maskPlaceholder.lineStyle(4, 0xffd900, 1);
+    this.maskPlaceholder.arc(0, 0, this.props.builderWidth, 0, Math.PI); // cx, cy, radius, startAngle, endAngle
+    this.maskPlaceholder.x = this.props.builderWidth / 2;
+    this.maskPlaceholder.y = this.props.builderHeight / 2;
+
+    // Handle different diagonal layouts depending on props
+    this.maskPlaceholder.rotation =
+      this.props.direction === 'left'
+        ? Math.PI -
+          Math.atan(this.props.builderHeight / this.props.builderWidth)
+        : Math.atan(this.props.builderHeight / this.props.builderWidth);
+
+    // Add the placeholder
+    this.app.stage.addChild(this.maskPlaceholder);
+
+    // Image 0 top layer
     this.app.stage.addChild(this.images[0]);
 
     this.draggify(this.images[0]);
@@ -61,8 +81,9 @@ export default class TwoDiagonal extends React.Component {
         ? Math.PI -
           Math.atan(this.props.builderHeight / this.props.builderWidth)
         : Math.atan(this.props.builderHeight / this.props.builderWidth);
-    this.app.stage.addChild(this.semicircle);
 
+    // Add to stage and then mask first image
+    this.app.stage.addChild(this.semicircle);
     this.images[0].mask = this.semicircle;
   }
 
@@ -106,10 +127,6 @@ export default class TwoDiagonal extends React.Component {
 
     // Load the texture into the sprite
     this.images[this.state.imageIndex].texture = texture;
-
-    // Toggle image loader target
-    if (this.state.imageIndex === 0) this.setState({ imageIndex: 1 });
-    else this.setState({ imageIndex: 0 });
 
     // Start the animation loop
     this.app.ticker.add(delta => this.animationLoop(delta));
@@ -241,19 +258,65 @@ export default class TwoDiagonal extends React.Component {
     }
   };
 
+  handlefileDialog = async imageIndex => {
+    let files = await fileDialog();
+    this.handleFileInput(files);
+
+    if (imageIndex !== undefined) this.setState({ imageIndex: imageIndex });
+  };
+
+  handleFileInput = files => {
+    if (files.length !== 1) return alert('Just give me one file please...');
+
+    const file = files[0];
+    if (file.type.split('/')[0] !== 'image')
+      return alert('Only image files are supported...');
+
+    this.readFile(file);
+  };
+
+  readFile = file => {
+    const reader = new FileReader();
+
+    reader.onload = evt => {
+      try {
+        const img = new Image();
+        img.src = evt.target.result;
+        this.handleImage(img);
+      } catch (e) {
+        return alert(e);
+      }
+    };
+
+    reader.readAsDataURL(file);
+  };
+
+  handleDoubleClick = event => {
+    let canvasTop = this.app.renderer.view.offsetTop;
+    let canvasLeft = this.app.renderer.view.offsetLeft;
+    let clickX = event.clientX;
+    let clickY = event.clientY;
+    let topOffset = window.pageYOffset;
+    let leftOffset = window.pageXOffset;
+    let clickCanvasX = clickX - canvasLeft + leftOffset;
+    let clickCanvasY = clickY - canvasTop + topOffset;
+
+    let point = new PIXI.Point(clickCanvasX, clickCanvasY);
+
+    let imageIndex = this.semicircle.containsPoint(point) ? 0 : 1;
+
+    this.handlefileDialog(imageIndex);
+  };
+
   render() {
     return (
       <div className={styles.wrapper}>
-        <ImageLoader
-          label={
-            this.state.imageIndex === 0
-              ? 'Open first image'
-              : 'Open second image'
-          }
-          handleImage={this.handleImage}
+        <p>Double-click to open image</p>
+        <div
+          className={styles.composer}
+          ref={el => (this.composer = el)}
+          onDoubleClick={this.handleDoubleClick}
         />
-
-        <div className={styles.composer} ref={el => (this.composer = el)} />
 
         <div className={styles.scale}>
           Left scale

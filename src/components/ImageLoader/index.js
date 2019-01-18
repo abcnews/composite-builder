@@ -18,7 +18,7 @@ export default class ImageLoader extends React.Component {
     this.readFile(file);
   };
 
-  readFile(file) {
+  readFile = (file) => {
     const reader = new FileReader();
 
     reader.onload = evt => {
