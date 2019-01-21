@@ -67,6 +67,7 @@ export default class TwoDiagonal extends React.Component {
     // Image 0 top layer
     this.app.stage.addChild(this.images[0]);
 
+    // Enable iamge dragging
     this.draggify(this.images[0]);
     this.draggify(this.images[1]);
 
@@ -180,15 +181,15 @@ export default class TwoDiagonal extends React.Component {
       this.x = newPosition.x - this.dragPoint.x;
       this.y = newPosition.y - this.dragPoint.y;
 
-      let bounds = this.getBounds();
+      let imageBounds = this.getBounds();
 
       // Keep image within stage bounds
       if (this.x > 0) this.x = 0;
       if (this.y > 0) this.y = 0;
-      if (bounds.x + bounds.width < BUILDER_WIDTH)
-        this.x = -(bounds.width - BUILDER_WIDTH);
-      if (bounds.y + bounds.height < BUILDER_HEIGHT)
-        this.y = -(bounds.height - BUILDER_HEIGHT);
+      if (imageBounds.x + imageBounds.width < BUILDER_WIDTH)
+        this.x = -(imageBounds.width - BUILDER_WIDTH);
+      if (imageBounds.y + imageBounds.height < BUILDER_HEIGHT)
+        this.y = -(imageBounds.height - BUILDER_HEIGHT);
     }
   }
 
@@ -204,15 +205,15 @@ export default class TwoDiagonal extends React.Component {
     img.scale.x = img.minScale * scale; //+ (scale / 100 - 0.01);
     img.scale.y = img.minScale * scale; //+ (scale / 100 - 0.01);
 
-    let bounds = img.getBounds();
+    let imageBounds = img.getBounds();
 
     // Keep image within stage bounds
     if (img.x > 0) img.x = 0;
     if (img.y > 0) img.y = 0;
-    if (img.x + bounds.width < this.props.builderWidth)
-      img.x = -(bounds.width - this.props.builderWidth);
-    if (img.y + bounds.height < this.props.builderHeight)
-      img.y = -(bounds.height - this.props.builderHeight);
+    if (img.x + imageBounds.width < this.props.builderWidth)
+      img.x = -(imageBounds.width - this.props.builderWidth);
+    if (img.y + imageBounds.height < this.props.builderHeight)
+      img.y = -(imageBounds.height - this.props.builderHeight);
   };
 
   handleSave = type => event => {

@@ -10,13 +10,16 @@ import { removeHash } from '../../helpers';
 let BUILDER_WIDTH = 800;
 let BUILDER_HEIGHT = 600;
 
+let that;
+
 export default class TwoDiagonal extends React.Component {
   state = {
     width: this.props.builderWidth,
     height: this.props.builderHeight,
     imageIndex: 0,
     topScale: 100,
-    bottomScale: 100
+    bottomScale: 100,
+    sectionPercent: 50
   };
 
   app = new PIXI.Application({
@@ -31,6 +34,7 @@ export default class TwoDiagonal extends React.Component {
   maskPlaceholder = new PIXI.Graphics();
 
   componentDidMount() {
+    that = this;
     // Hackish way of accessing these in drag events
     BUILDER_WIDTH = this.props.builderWidth;
     BUILDER_HEIGHT = this.props.builderHeight;
@@ -61,8 +65,13 @@ export default class TwoDiagonal extends React.Component {
     // Image 0 top layer
     this.app.stage.addChild(this.images[0]);
 
+    // Enable iamge dragging
     this.draggify(this.images[0]);
     this.draggify(this.images[1]);
+
+    // Name images to check later for dragging and zoom bounds
+    this.images[0].name = 'top';
+    this.images[1].name = 'bottom';
 
     // Let's try a semi circle
     this.semicircle.beginFill(0xff0000);
@@ -168,16 +177,34 @@ export default class TwoDiagonal extends React.Component {
       this.x = newPosition.x - this.dragPoint.x;
       this.y = newPosition.y - this.dragPoint.y;
 
-      let bounds = this.getBounds();
+      let imageBounds = this.getBounds();
 
-      // Keep top corner in bounds
-      if (this.x > 0) this.x = 0;
-      if (this.y > 0) this.y = 0;
+      // Top and bottom images hhave different bounding boxes
+      if (this.name === 'top') {
+        // Keep top corner in bounds
+        if (this.x > 0) this.x = 0;
+        if (this.y > 0) this.y = 0;
 
-      if (bounds.x + bounds.width < BUILDER_WIDTH)
-        this.x = -(bounds.width - BUILDER_WIDTH);
-      if (bounds.y + bounds.height < BUILDER_HEIGHT)
-        this.y = -(bounds.height - BUILDER_HEIGHT);
+        if (imageBounds.x + imageBounds.width < BUILDER_WIDTH)
+          this.x = -(imageBounds.width - BUILDER_WIDTH);
+        if (
+          imageBounds.y + imageBounds.height <
+          BUILDER_HEIGHT * (that.state.sectionPercent / 100)
+        )
+          this.y = -(
+            imageBounds.height -
+            BUILDER_HEIGHT * (that.state.sectionPercent / 100)
+          );
+      } else {
+        if (this.x > 0) this.x = 0;
+        if (this.y > 0 + BUILDER_HEIGHT * (that.state.sectionPercent / 100))
+          this.y = 0 + BUILDER_HEIGHT * (that.state.sectionPercent / 100);
+
+        if (imageBounds.x + imageBounds.width < BUILDER_WIDTH)
+          this.x = -(imageBounds.width - BUILDER_WIDTH);
+        if (imageBounds.y + imageBounds.height < BUILDER_HEIGHT)
+          this.y = -(imageBounds.height - BUILDER_HEIGHT);
+      }
     }
   }
 
@@ -193,15 +220,34 @@ export default class TwoDiagonal extends React.Component {
     img.scale.x = img.minScale * scale; //+ (scale / 100 - 0.01);
     img.scale.y = img.minScale * scale; //+ (scale / 100 - 0.01);
 
-    let bounds = img.getBounds();
+    let imageBounds = img.getBounds();
 
-    // Keep image within stage bounds
-    if (img.x > 0) img.x = 0;
-    if (img.y > 0) img.y = 0;
-    if (img.x + bounds.width < this.props.builderWidth)
-      img.x = -(bounds.width - this.props.builderWidth);
-    if (img.y + bounds.height < this.props.builderHeight)
-      img.y = -(bounds.height - this.props.builderHeight);
+    // Top and bottom images hhave different bounding boxes
+    if (img.name === 'top') {
+      // Keep image within stage bounds
+      if (img.x > 0) img.x = 0;
+      if (img.y > 0) img.y = 0;
+
+      if (img.x + imageBounds.width < this.props.builderWidth)
+        img.x = -(imageBounds.width - this.props.builderWidth);
+      if (
+        img.y + imageBounds.height <
+        this.props.builderHeight * (this.state.sectionPercent / 100)
+      )
+        img.y = -(
+          imageBounds.height -
+          this.props.builderHeight * (this.state.sectionPercent / 100)
+        );
+    } else {
+      if (img.x > 0) img.x = 0;
+      if (img.y > 0 + BUILDER_HEIGHT * (this.state.sectionPercent / 100))
+        img.y = 0 + BUILDER_HEIGHT * (this.state.sectionPercent / 100);
+
+      if (img.x + imageBounds.width < this.props.builderWidth)
+        img.x = -(imageBounds.width - this.props.builderWidth);
+      if (img.y + imageBounds.height < this.props.builderHeight)
+        img.y = -(imageBounds.height - this.props.builderHeight);
+    }
   };
 
   handleSave = type => event => {
