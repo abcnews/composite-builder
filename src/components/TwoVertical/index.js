@@ -145,8 +145,6 @@ export default class TwoDiagonal extends React.Component {
     if (this.state.imageIndex === 0) this.setState({ topScale: 100 });
     else this.setState({ bottomScale: 100 });
 
-    console.log(this.images[this.state.imageIndex].baseY)
-
     // Reposition image up top
     this.images[this.state.imageIndex].x = 0;
     this.images[this.state.imageIndex].y = this.images[this.state.imageIndex].baseY;
@@ -305,7 +303,6 @@ export default class TwoDiagonal extends React.Component {
     // Detect if we are on a Microsoft browser or not
     if (browser.name === 'edge' || browser.name === 'ie') {
       this.app.renderer.view.toBlob(blob => {
-        console.log(blob);
         window.navigator.msSaveOrOpenBlob(blob, filename);
       }, encoding);
     } else {

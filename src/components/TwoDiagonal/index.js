@@ -244,7 +244,6 @@ export default class TwoDiagonal extends React.Component {
     // Detect if we are on a Microsoft browser or not
     if (browser.name === 'edge' || browser.name === 'ie') {
       this.app.renderer.view.toBlob(blob => {
-        console.log(blob);
         window.navigator.msSaveOrOpenBlob(blob, filename);
       }, encoding);
     } else {
