@@ -74,6 +74,10 @@ export default class TwoDiagonal extends React.Component {
     this.images[0].name = 'top';
     this.images[1].name = 'bottom';
 
+    this.images[0].baseY = 0;
+    this.images[1].baseY =
+      this.props.builderHeight * (this.state.sectionPercentY / 100);
+
     // Let's try a semi circle
     this.semicircle.beginFill(0xff0000);
     this.semicircle.lineStyle(4, 0xffd900, 1);
@@ -104,31 +108,48 @@ export default class TwoDiagonal extends React.Component {
   process = texture => {
     const { width, height } = texture;
     const textureRatio = width / height;
-    const builderRatio = this.props.builderWidth / this.props.builderHeight;
+
+    const topPanelHeight =
+      this.props.builderHeight * (this.state.sectionPercentY / 100);
+    const bottomPanelHeight =
+      this.props.builderHeight * (1 - this.state.sectionPercentY / 100);
+
+    const panelHeight =
+      this.state.imageIndex === 0
+        ? this.props.builderHeight * (this.state.sectionPercentY / 100)
+        : this.props.builderHeight * (1 - this.state.sectionPercentY / 100);
+
+    // const builderRatio = this.props.builderWidth / this.props.builderHeight;
+
+    const panelRatio =
+      this.props.builderWidth /
+      (this.state.imageIndex === 0 ? topPanelHeight : bottomPanelHeight);
 
     const widthRatio = this.props.builderWidth / width;
-    const heightRatio = this.props.builderHeight / height;
-    
-    console.log(
-      width,
-      height,
-      widthRatio,
-      heightRatio,
-      builderRatio,
-      textureRatio
-    );
+    const heightRatio = panelHeight / height;
 
-    // For vertical only scale to fit width
-    this.images[this.state.imageIndex].scale.set(widthRatio, widthRatio);
-    this.images[this.state.imageIndex].minScale = widthRatio;
+    // Scale image so it fits on stage
+    if (textureRatio > panelRatio) {
+      this.images[this.state.imageIndex].scale.set(heightRatio, heightRatio);
+      this.images[this.state.imageIndex].minScale = heightRatio;
+    } else {
+      this.images[this.state.imageIndex].scale.set(widthRatio, widthRatio);
+      this.images[this.state.imageIndex].minScale = widthRatio;
+    }
+
+    // For vertical only scale width
+    // this.images[this.state.imageIndex].scale.set(widthRatio, widthRatio);
+    // this.images[this.state.imageIndex].minScale = widthRatio;
 
     // Reset our sliders to zero
     if (this.state.imageIndex === 0) this.setState({ topScale: 100 });
     else this.setState({ bottomScale: 100 });
 
+    console.log(this.images[this.state.imageIndex].baseY)
+
     // Reposition image up top
     this.images[this.state.imageIndex].x = 0;
-    this.images[this.state.imageIndex].y = 0;
+    this.images[this.state.imageIndex].y = this.images[this.state.imageIndex].baseY;
 
     // Load the texture into the sprite
     this.images[this.state.imageIndex].texture = texture;
