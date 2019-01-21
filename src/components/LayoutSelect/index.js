@@ -5,6 +5,7 @@ const styles = require('./styles.scss');
 const twoImage = require('./images/two-image.jpg');
 const twoDiagonal = require('./images/two-diagonal.jpg');
 const twoDiagonalRight = require('./images/two-diagonal-right.jpg');
+const twoVertical = require('./images/two-vertical.jpg');
 
 export default class LayoutSelect extends React.Component {
   handleClick = event => {
@@ -15,6 +16,7 @@ export default class LayoutSelect extends React.Component {
     return (
       <div className={styles.wrapper}>
         <p>Please select the layout you wish to use.</p>
+
         <div className={styles.layout}>
           <a
             onClick={this.handleClick}
@@ -25,6 +27,7 @@ export default class LayoutSelect extends React.Component {
           </a>
           <br /><strong>Original</strong>
         </div>
+
         <div className={styles.layout}>
           <a
             onClick={this.handleClick}
@@ -35,6 +38,7 @@ export default class LayoutSelect extends React.Component {
           </a>
           <br /><strong>Diagonal</strong>
         </div>
+
         <div className={styles.layout}>
           <a
             onClick={this.handleClick}
@@ -49,6 +53,22 @@ export default class LayoutSelect extends React.Component {
           </a>
           <br /><strong>Diagonal (inverse)</strong>
         </div>
+
+        <div className={styles.layout}>
+          <a
+            onClick={this.handleClick}
+            href="#two-diagonal-right"
+            title="Two images split horizontally"
+          >
+            <img
+              width="320"
+              src={twoVertical}
+              name={'two-vertical'}
+            />
+          </a>
+          <br /><strong>Vertical</strong>
+        </div>
+
         <div className={styles.footer}><a href="https://github.com/abcnews/composite-builder/issues">Feedback / Ideas?</a></div>
       </div>
     );

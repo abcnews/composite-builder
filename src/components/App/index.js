@@ -5,6 +5,7 @@ const styles = require('./styles.scss');
 import LayoutSelect from '../LayoutSelect';
 import TwoImage from '../TwoImage';
 import TwoDiagonal from '../TwoDiagonal';
+import TwoVertical from '../TwoVertical';
 
 export default class App extends React.Component {
   state = {
@@ -44,7 +45,12 @@ export default class App extends React.Component {
         {this.state.view === 'layout-select' && <LayoutSelect />}
         {this.state.view === 'two-image' && <TwoImage />}
         {this.state.view === 'two-diagonal' && <TwoDiagonal />}
-        {this.state.view === 'two-diagonal-right' && <TwoDiagonal direction={"right"} />}
+        {this.state.view === 'two-diagonal-right' && (
+          <TwoDiagonal direction={'right'} />
+        )}
+        {this.state.view === 'two-vertical' && (
+          <TwoVertical direction={'right'} />
+        )}
       </div>
     );
   }
