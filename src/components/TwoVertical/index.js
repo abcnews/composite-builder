@@ -10,13 +10,16 @@ import { removeHash } from '../../helpers';
 let BUILDER_WIDTH = 800;
 let BUILDER_HEIGHT = 600;
 
+let that;
+
 export default class TwoDiagonal extends React.Component {
   state = {
     width: this.props.builderWidth,
     height: this.props.builderHeight,
     imageIndex: 0,
     topScale: 100,
-    bottomScale: 100
+    bottomScale: 100,
+    sectionPercentY: 50
   };
 
   app = new PIXI.Application({
@@ -31,6 +34,7 @@ export default class TwoDiagonal extends React.Component {
   maskPlaceholder = new PIXI.Graphics();
 
   componentDidMount() {
+    that = this;
     // Hackish way of accessing these in drag events
     BUILDER_WIDTH = this.props.builderWidth;
     BUILDER_HEIGHT = this.props.builderHeight;
@@ -52,14 +56,9 @@ export default class TwoDiagonal extends React.Component {
     this.maskPlaceholder.lineStyle(4, 0xffd900, 1);
     this.maskPlaceholder.arc(0, 0, this.props.builderWidth, 0, Math.PI); // cx, cy, radius, startAngle, endAngle
     this.maskPlaceholder.x = this.props.builderWidth / 2;
-    this.maskPlaceholder.y = this.props.builderHeight / 2;
-
-    // Handle different diagonal layouts depending on props
-    this.maskPlaceholder.rotation =
-      this.props.direction === 'left'
-        ? Math.PI -
-          Math.atan(this.props.builderHeight / this.props.builderWidth)
-        : Math.atan(this.props.builderHeight / this.props.builderWidth);
+    this.maskPlaceholder.y =
+      this.props.builderHeight * (this.state.sectionPercentY / 100);
+    this.maskPlaceholder.rotation = Math.PI;
 
     // Add the placeholder
     this.app.stage.addChild(this.maskPlaceholder);
@@ -71,19 +70,22 @@ export default class TwoDiagonal extends React.Component {
     this.draggify(this.images[0]);
     this.draggify(this.images[1]);
 
+    // Name images to check later for dragging and zoom bounds
+    this.images[0].name = 'top';
+    this.images[1].name = 'bottom';
+
+    this.images[0].baseY = 0;
+    this.images[1].baseY =
+      this.props.builderHeight * (this.state.sectionPercentY / 100);
+
     // Let's try a semi circle
     this.semicircle.beginFill(0xff0000);
     this.semicircle.lineStyle(4, 0xffd900, 1);
     this.semicircle.arc(0, 0, this.props.builderWidth, 0, Math.PI); // cx, cy, radius, startAngle, endAngle
     this.semicircle.x = this.props.builderWidth / 2;
-    this.semicircle.y = this.props.builderHeight / 2;
-
-    // Handle different diagonal layouts depending on props
-    this.semicircle.rotation =
-      this.props.direction === 'left'
-        ? Math.PI -
-          Math.atan(this.props.builderHeight / this.props.builderWidth)
-        : Math.atan(this.props.builderHeight / this.props.builderWidth);
+    this.semicircle.y =
+      this.props.builderHeight * (this.state.sectionPercentY / 100);
+    this.semicircle.rotation = Math.PI;
 
     // Add to stage and then mask first image
     this.app.stage.addChild(this.semicircle);
@@ -106,13 +108,28 @@ export default class TwoDiagonal extends React.Component {
   process = texture => {
     const { width, height } = texture;
     const textureRatio = width / height;
-    const builderRatio = this.props.builderWidth / this.props.builderHeight;
 
-    const heightRatio = this.props.builderHeight / height;
+    const topPanelHeight =
+      this.props.builderHeight * (this.state.sectionPercentY / 100);
+    const bottomPanelHeight =
+      this.props.builderHeight * (1 - this.state.sectionPercentY / 100);
+
+    const panelHeight =
+      this.state.imageIndex === 0
+        ? this.props.builderHeight * (this.state.sectionPercentY / 100)
+        : this.props.builderHeight * (1 - this.state.sectionPercentY / 100);
+
+    // const builderRatio = this.props.builderWidth / this.props.builderHeight;
+
+    const panelRatio =
+      this.props.builderWidth /
+      (this.state.imageIndex === 0 ? topPanelHeight : bottomPanelHeight);
+
     const widthRatio = this.props.builderWidth / width;
+    const heightRatio = panelHeight / height;
 
     // Scale image so it fits on stage
-    if (textureRatio > builderRatio) {
+    if (textureRatio > panelRatio) {
       this.images[this.state.imageIndex].scale.set(heightRatio, heightRatio);
       this.images[this.state.imageIndex].minScale = heightRatio;
     } else {
@@ -120,13 +137,17 @@ export default class TwoDiagonal extends React.Component {
       this.images[this.state.imageIndex].minScale = widthRatio;
     }
 
+    // For vertical only scale width
+    // this.images[this.state.imageIndex].scale.set(widthRatio, widthRatio);
+    // this.images[this.state.imageIndex].minScale = widthRatio;
+
     // Reset our sliders to zero
     if (this.state.imageIndex === 0) this.setState({ topScale: 100 });
     else this.setState({ bottomScale: 100 });
 
     // Reposition image up top
     this.images[this.state.imageIndex].x = 0;
-    this.images[this.state.imageIndex].y = 0;
+    this.images[this.state.imageIndex].y = this.images[this.state.imageIndex].baseY;
 
     // Load the texture into the sprite
     this.images[this.state.imageIndex].texture = texture;
@@ -183,13 +204,32 @@ export default class TwoDiagonal extends React.Component {
 
       let imageBounds = this.getBounds();
 
-      // Keep image within stage bounds
-      if (this.x > 0) this.x = 0;
-      if (this.y > 0) this.y = 0;
-      if (imageBounds.x + imageBounds.width < BUILDER_WIDTH)
-        this.x = -(imageBounds.width - BUILDER_WIDTH);
-      if (imageBounds.y + imageBounds.height < BUILDER_HEIGHT)
-        this.y = -(imageBounds.height - BUILDER_HEIGHT);
+      // Top and bottom images hhave different bounding boxes
+      if (this.name === 'top') {
+        // Keep top corner in bounds
+        if (this.x > 0) this.x = 0;
+        if (this.y > 0) this.y = 0;
+
+        if (imageBounds.x + imageBounds.width < BUILDER_WIDTH)
+          this.x = -(imageBounds.width - BUILDER_WIDTH);
+        if (
+          imageBounds.y + imageBounds.height <
+          BUILDER_HEIGHT * (that.state.sectionPercentY / 100)
+        )
+          this.y = -(
+            imageBounds.height -
+            BUILDER_HEIGHT * (that.state.sectionPercentY / 100)
+          );
+      } else {
+        if (this.x > 0) this.x = 0;
+        if (this.y > 0 + BUILDER_HEIGHT * (that.state.sectionPercentY / 100))
+          this.y = 0 + BUILDER_HEIGHT * (that.state.sectionPercentY / 100);
+
+        if (imageBounds.x + imageBounds.width < BUILDER_WIDTH)
+          this.x = -(imageBounds.width - BUILDER_WIDTH);
+        if (imageBounds.y + imageBounds.height < BUILDER_HEIGHT)
+          this.y = -(imageBounds.height - BUILDER_HEIGHT);
+      }
     }
   }
 
@@ -207,13 +247,32 @@ export default class TwoDiagonal extends React.Component {
 
     let imageBounds = img.getBounds();
 
-    // Keep image within stage bounds
-    if (img.x > 0) img.x = 0;
-    if (img.y > 0) img.y = 0;
-    if (img.x + imageBounds.width < this.props.builderWidth)
-      img.x = -(imageBounds.width - this.props.builderWidth);
-    if (img.y + imageBounds.height < this.props.builderHeight)
-      img.y = -(imageBounds.height - this.props.builderHeight);
+    // Top and bottom images hhave different bounding boxes
+    if (img.name === 'top') {
+      // Keep image within stage bounds
+      if (img.x > 0) img.x = 0;
+      if (img.y > 0) img.y = 0;
+
+      if (img.x + imageBounds.width < this.props.builderWidth)
+        img.x = -(imageBounds.width - this.props.builderWidth);
+      if (
+        img.y + imageBounds.height <
+        this.props.builderHeight * (this.state.sectionPercentY / 100)
+      )
+        img.y = -(
+          imageBounds.height -
+          this.props.builderHeight * (this.state.sectionPercentY / 100)
+        );
+    } else {
+      if (img.x > 0) img.x = 0;
+      if (img.y > 0 + BUILDER_HEIGHT * (this.state.sectionPercentY / 100))
+        img.y = 0 + BUILDER_HEIGHT * (this.state.sectionPercentY / 100);
+
+      if (img.x + imageBounds.width < this.props.builderWidth)
+        img.x = -(imageBounds.width - this.props.builderWidth);
+      if (img.y + imageBounds.height < this.props.builderHeight)
+        img.y = -(imageBounds.height - this.props.builderHeight);
+    }
   };
 
   handleSave = type => event => {
@@ -321,7 +380,7 @@ export default class TwoDiagonal extends React.Component {
         />
 
         <div className={styles.scale}>
-          Left scale
+          Top scale
           <br />
           <input
             className={styles.slider}
@@ -336,7 +395,7 @@ export default class TwoDiagonal extends React.Component {
         </div>
 
         <div className={styles.scale}>
-          Right scale
+          Bottom scale
           <br />
           <input
             className={styles.slider}
