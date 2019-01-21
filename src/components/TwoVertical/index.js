@@ -19,7 +19,7 @@ export default class TwoDiagonal extends React.Component {
     imageIndex: 0,
     topScale: 100,
     bottomScale: 100,
-    sectionPercent: 50
+    sectionPercentY: 50
   };
 
   app = new PIXI.Application({
@@ -56,7 +56,8 @@ export default class TwoDiagonal extends React.Component {
     this.maskPlaceholder.lineStyle(4, 0xffd900, 1);
     this.maskPlaceholder.arc(0, 0, this.props.builderWidth, 0, Math.PI); // cx, cy, radius, startAngle, endAngle
     this.maskPlaceholder.x = this.props.builderWidth / 2;
-    this.maskPlaceholder.y = this.props.builderHeight / 2;
+    this.maskPlaceholder.y =
+      this.props.builderHeight * (this.state.sectionPercentY / 100);
     this.maskPlaceholder.rotation = Math.PI;
 
     // Add the placeholder
@@ -78,7 +79,8 @@ export default class TwoDiagonal extends React.Component {
     this.semicircle.lineStyle(4, 0xffd900, 1);
     this.semicircle.arc(0, 0, this.props.builderWidth, 0, Math.PI); // cx, cy, radius, startAngle, endAngle
     this.semicircle.x = this.props.builderWidth / 2;
-    this.semicircle.y = this.props.builderHeight / 2;
+    this.semicircle.y =
+      this.props.builderHeight * (this.state.sectionPercentY / 100);
     this.semicircle.rotation = Math.PI;
 
     // Add to stage and then mask first image
@@ -104,17 +106,21 @@ export default class TwoDiagonal extends React.Component {
     const textureRatio = width / height;
     const builderRatio = this.props.builderWidth / this.props.builderHeight;
 
-    const heightRatio = this.props.builderHeight / height;
     const widthRatio = this.props.builderWidth / width;
+    const heightRatio = this.props.builderHeight / height;
+    
+    console.log(
+      width,
+      height,
+      widthRatio,
+      heightRatio,
+      builderRatio,
+      textureRatio
+    );
 
-    // Scale image so it fits on stage
-    if (textureRatio > builderRatio) {
-      this.images[this.state.imageIndex].scale.set(heightRatio, heightRatio);
-      this.images[this.state.imageIndex].minScale = heightRatio;
-    } else {
-      this.images[this.state.imageIndex].scale.set(widthRatio, widthRatio);
-      this.images[this.state.imageIndex].minScale = widthRatio;
-    }
+    // For vertical only scale to fit width
+    this.images[this.state.imageIndex].scale.set(widthRatio, widthRatio);
+    this.images[this.state.imageIndex].minScale = widthRatio;
 
     // Reset our sliders to zero
     if (this.state.imageIndex === 0) this.setState({ topScale: 100 });
@@ -189,16 +195,16 @@ export default class TwoDiagonal extends React.Component {
           this.x = -(imageBounds.width - BUILDER_WIDTH);
         if (
           imageBounds.y + imageBounds.height <
-          BUILDER_HEIGHT * (that.state.sectionPercent / 100)
+          BUILDER_HEIGHT * (that.state.sectionPercentY / 100)
         )
           this.y = -(
             imageBounds.height -
-            BUILDER_HEIGHT * (that.state.sectionPercent / 100)
+            BUILDER_HEIGHT * (that.state.sectionPercentY / 100)
           );
       } else {
         if (this.x > 0) this.x = 0;
-        if (this.y > 0 + BUILDER_HEIGHT * (that.state.sectionPercent / 100))
-          this.y = 0 + BUILDER_HEIGHT * (that.state.sectionPercent / 100);
+        if (this.y > 0 + BUILDER_HEIGHT * (that.state.sectionPercentY / 100))
+          this.y = 0 + BUILDER_HEIGHT * (that.state.sectionPercentY / 100);
 
         if (imageBounds.x + imageBounds.width < BUILDER_WIDTH)
           this.x = -(imageBounds.width - BUILDER_WIDTH);
@@ -232,16 +238,16 @@ export default class TwoDiagonal extends React.Component {
         img.x = -(imageBounds.width - this.props.builderWidth);
       if (
         img.y + imageBounds.height <
-        this.props.builderHeight * (this.state.sectionPercent / 100)
+        this.props.builderHeight * (this.state.sectionPercentY / 100)
       )
         img.y = -(
           imageBounds.height -
-          this.props.builderHeight * (this.state.sectionPercent / 100)
+          this.props.builderHeight * (this.state.sectionPercentY / 100)
         );
     } else {
       if (img.x > 0) img.x = 0;
-      if (img.y > 0 + BUILDER_HEIGHT * (this.state.sectionPercent / 100))
-        img.y = 0 + BUILDER_HEIGHT * (this.state.sectionPercent / 100);
+      if (img.y > 0 + BUILDER_HEIGHT * (this.state.sectionPercentY / 100))
+        img.y = 0 + BUILDER_HEIGHT * (this.state.sectionPercentY / 100);
 
       if (img.x + imageBounds.width < this.props.builderWidth)
         img.x = -(imageBounds.width - this.props.builderWidth);
