@@ -47,8 +47,14 @@ export default class TwoDiagonal extends React.Component {
 
     // Use a placeholder for image 0
     this.maskPlaceholder.beginFill(0xcccccc);
-    this.maskPlaceholder.lineStyle(4, 0xffd900, 1);
-    this.maskPlaceholder.arc(0, 0, this.state.width, 0, Math.PI); // cx, cy, radius, startAngle, endAngle
+    this.maskPlaceholder.lineStyle(0, 0xffd900, 1);
+    this.maskPlaceholder.arc(
+      0,
+      0,
+      Math.hypot(this.state.width, this.state.height),
+      0,
+      Math.PI
+    ); // cx, cy, radius, startAngle, endAngle
     this.maskPlaceholder.x = this.state.width / 2;
     this.maskPlaceholder.y =
       this.state.height * (this.state.sectionPercentY / 100);
@@ -75,7 +81,13 @@ export default class TwoDiagonal extends React.Component {
     // Let's try a semi circle
     this.semicircle.beginFill(0xff0000);
     this.semicircle.lineStyle(4, 0xffd900, 1);
-    this.semicircle.arc(0, 0, this.state.width, 0, Math.PI); // cx, cy, radius, startAngle, endAngle
+    this.semicircle.arc(
+      0,
+      0,
+      Math.hypot(this.state.width, this.state.height),
+      0,
+      Math.PI
+    ); // cx, cy, radius, startAngle, endAngle
     this.semicircle.x = this.state.width / 2;
     this.semicircle.y = this.state.height * (this.state.sectionPercentY / 100);
     this.semicircle.rotation = Math.PI;
@@ -127,10 +139,6 @@ export default class TwoDiagonal extends React.Component {
       this.images[this.state.imageIndex].scale.set(widthRatio, widthRatio);
       this.images[this.state.imageIndex].minScale = widthRatio;
     }
-
-    // For vertical only scale width
-    // this.images[this.state.imageIndex].scale.set(widthRatio, widthRatio);
-    // this.images[this.state.imageIndex].minScale = widthRatio;
 
     // Reset our sliders to zero
     if (this.state.imageIndex === 0) this.setState({ topScale: 100 });
@@ -362,20 +370,41 @@ export default class TwoDiagonal extends React.Component {
     this.handlefileDialog(imageIndex);
   };
 
-  testing = async (input, event) => {
-    this.app.renderer.resize(700, 1600);
-    await this.setState({ width: 700, height: 1600 });
+  swapOrientation = async  event => {
+    // Set state. Await bc state is async
+    await this.setState(prevState => {
+      return { width: prevState.height, height: prevState.width };
+    });
+
+    // Reset the textures (TODO: implement resize so we don't have to reload images)
+    this.images[0].texture = PIXI.Texture.EMPTY;
+    this.images[1].texture = PIXI.Texture.EMPTY;
+
+    this.app.renderer.resize(this.state.width, this.state.height);
 
     this.maskPlaceholder.y =
       this.state.height * (this.state.sectionPercentY / 100);
+    this.maskPlaceholder.x = this.state.width / 2;
+    this.maskPlaceholder.width = Math.hypot(
+      this.state.width,
+      this.state.height
+    );
+    this.maskPlaceholder.height = Math.hypot(
+      this.state.width,
+      this.state.height
+    );
 
     this.semicircle.y = this.state.height * (this.state.sectionPercentY / 100);
+    this.semicircle.x = this.state.width / 2;
+    this.semicircle.width = Math.hypot(this.state.width, this.state.height);
+    this.semicircle.height = Math.hypot(this.state.width, this.state.height);
   };
 
   render() {
     return (
       <div className={styles.wrapper}>
-        <button onClick={event => this.testing('test', event)}>Testing</button>
+      <p><button className={styles.button} onClick={this.swapOrientation}>Portrait / Landscape</button></p>
+
 
         <p>Double-click to open image</p>
 
@@ -414,6 +443,10 @@ export default class TwoDiagonal extends React.Component {
             onChange={this.doZoom}
           />
         </div>
+
+        
+
+
         <p>
           <a
             className={styles.button}

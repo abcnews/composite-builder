@@ -21,7 +21,7 @@
   margin: 0 10px;
 }
 
-a.button {
+.button {
   display: inline-block;
   padding: 0.45em 1.3em 0.28em 1.3em;
   border: 0.1em solid #222;
@@ -35,12 +35,12 @@ a.button {
   text-align: center;
   transition: all 0.05s;
 }
-a.button:hover {
+.button:hover {
   color: white;
   background-color: #222;
 }
 @media all and (max-width: 30em) {
-  a.button {
+  .button {
     display: block;
     margin: 0.4em auto;
   }
