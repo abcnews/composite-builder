@@ -7,10 +7,7 @@ const browser = detect();
 
 import { removeHash } from '../../helpers';
 
-let BUILDER_WIDTH = 800;
-let BUILDER_HEIGHT = 600;
-
-let that;
+let that; // Later used to access class in drag events
 
 export default class TwoDiagonal extends React.Component {
   state = {
@@ -34,10 +31,7 @@ export default class TwoDiagonal extends React.Component {
   maskPlaceholder = new PIXI.Graphics();
 
   componentDidMount() {
-    that = this;
-    // Hackish way of accessing these in drag events
-    BUILDER_WIDTH = this.props.builderWidth;
-    BUILDER_HEIGHT = this.props.builderHeight;
+    that = this; // To access this in dPIXI drag events
 
     // Set up the sprite images
     const numberOfImages = 2;
@@ -46,18 +40,18 @@ export default class TwoDiagonal extends React.Component {
     }
 
     this.app.renderer.autoResize = true;
-    this.app.renderer.resize(this.props.builderWidth, this.props.builderHeight); // Default: 800 x 600
+    this.app.renderer.resize(this.state.width, this.state.height); // Default: 800 x 600
     this.composer.appendChild(this.app.view); // Attach PIXI app
-    this.composer.style.width = this.props.builderWidth + 'px'; // Wrap container tightly
+    this.composer.style.width = this.state.width + 'px'; // Wrap container tightly
     this.app.stage.addChild(this.images[1]);
 
     // Use a placeholder for image 0
     this.maskPlaceholder.beginFill(0xcccccc);
     this.maskPlaceholder.lineStyle(4, 0xffd900, 1);
-    this.maskPlaceholder.arc(0, 0, this.props.builderWidth, 0, Math.PI); // cx, cy, radius, startAngle, endAngle
-    this.maskPlaceholder.x = this.props.builderWidth / 2;
+    this.maskPlaceholder.arc(0, 0, this.state.width, 0, Math.PI); // cx, cy, radius, startAngle, endAngle
+    this.maskPlaceholder.x = this.state.width / 2;
     this.maskPlaceholder.y =
-      this.props.builderHeight * (this.state.sectionPercentY / 100);
+      this.state.height * (this.state.sectionPercentY / 100);
     this.maskPlaceholder.rotation = Math.PI;
 
     // Add the placeholder
@@ -76,15 +70,14 @@ export default class TwoDiagonal extends React.Component {
 
     this.images[0].baseY = 0;
     this.images[1].baseY =
-      this.props.builderHeight * (this.state.sectionPercentY / 100);
+      this.state.height * (this.state.sectionPercentY / 100);
 
     // Let's try a semi circle
     this.semicircle.beginFill(0xff0000);
     this.semicircle.lineStyle(4, 0xffd900, 1);
-    this.semicircle.arc(0, 0, this.props.builderWidth, 0, Math.PI); // cx, cy, radius, startAngle, endAngle
-    this.semicircle.x = this.props.builderWidth / 2;
-    this.semicircle.y =
-      this.props.builderHeight * (this.state.sectionPercentY / 100);
+    this.semicircle.arc(0, 0, this.state.width, 0, Math.PI); // cx, cy, radius, startAngle, endAngle
+    this.semicircle.x = this.state.width / 2;
+    this.semicircle.y = this.state.height * (this.state.sectionPercentY / 100);
     this.semicircle.rotation = Math.PI;
 
     // Add to stage and then mask first image
@@ -110,22 +103,20 @@ export default class TwoDiagonal extends React.Component {
     const textureRatio = width / height;
 
     const topPanelHeight =
-      this.props.builderHeight * (this.state.sectionPercentY / 100);
+      this.state.height * (this.state.sectionPercentY / 100);
     const bottomPanelHeight =
-      this.props.builderHeight * (1 - this.state.sectionPercentY / 100);
+      this.state.height * (1 - this.state.sectionPercentY / 100);
 
     const panelHeight =
       this.state.imageIndex === 0
-        ? this.props.builderHeight * (this.state.sectionPercentY / 100)
-        : this.props.builderHeight * (1 - this.state.sectionPercentY / 100);
-
-    // const builderRatio = this.props.builderWidth / this.props.builderHeight;
+        ? this.state.height * (this.state.sectionPercentY / 100)
+        : this.state.height * (1 - this.state.sectionPercentY / 100);
 
     const panelRatio =
-      this.props.builderWidth /
+      this.state.width /
       (this.state.imageIndex === 0 ? topPanelHeight : bottomPanelHeight);
 
-    const widthRatio = this.props.builderWidth / width;
+    const widthRatio = this.state.width / width;
     const heightRatio = panelHeight / height;
 
     // Scale image so it fits on stage
@@ -147,7 +138,9 @@ export default class TwoDiagonal extends React.Component {
 
     // Reposition image up top
     this.images[this.state.imageIndex].x = 0;
-    this.images[this.state.imageIndex].y = this.images[this.state.imageIndex].baseY;
+    this.images[this.state.imageIndex].y = this.images[
+      this.state.imageIndex
+    ].baseY;
 
     // Load the texture into the sprite
     this.images[this.state.imageIndex].texture = texture;
@@ -210,25 +203,25 @@ export default class TwoDiagonal extends React.Component {
         if (this.x > 0) this.x = 0;
         if (this.y > 0) this.y = 0;
 
-        if (imageBounds.x + imageBounds.width < BUILDER_WIDTH)
-          this.x = -(imageBounds.width - BUILDER_WIDTH);
+        if (imageBounds.x + imageBounds.width < that.state.width)
+          this.x = -(imageBounds.width - that.state.width);
         if (
           imageBounds.y + imageBounds.height <
-          BUILDER_HEIGHT * (that.state.sectionPercentY / 100)
+          that.state.height * (that.state.sectionPercentY / 100)
         )
           this.y = -(
             imageBounds.height -
-            BUILDER_HEIGHT * (that.state.sectionPercentY / 100)
+            that.state.height * (that.state.sectionPercentY / 100)
           );
       } else {
         if (this.x > 0) this.x = 0;
-        if (this.y > 0 + BUILDER_HEIGHT * (that.state.sectionPercentY / 100))
-          this.y = 0 + BUILDER_HEIGHT * (that.state.sectionPercentY / 100);
+        if (this.y > 0 + that.state.height * (that.state.sectionPercentY / 100))
+          this.y = 0 + that.state.height * (that.state.sectionPercentY / 100);
 
-        if (imageBounds.x + imageBounds.width < BUILDER_WIDTH)
-          this.x = -(imageBounds.width - BUILDER_WIDTH);
-        if (imageBounds.y + imageBounds.height < BUILDER_HEIGHT)
-          this.y = -(imageBounds.height - BUILDER_HEIGHT);
+        if (imageBounds.x + imageBounds.width < that.state.width)
+          this.x = -(imageBounds.width - that.state.width);
+        if (imageBounds.y + imageBounds.height < that.state.height)
+          this.y = -(imageBounds.height - that.state.height);
       }
     }
   }
@@ -253,25 +246,25 @@ export default class TwoDiagonal extends React.Component {
       if (img.x > 0) img.x = 0;
       if (img.y > 0) img.y = 0;
 
-      if (img.x + imageBounds.width < this.props.builderWidth)
-        img.x = -(imageBounds.width - this.props.builderWidth);
+      if (img.x + imageBounds.width < this.state.width)
+        img.x = -(imageBounds.width - this.state.width);
       if (
         img.y + imageBounds.height <
-        this.props.builderHeight * (this.state.sectionPercentY / 100)
+        this.state.height * (this.state.sectionPercentY / 100)
       )
         img.y = -(
           imageBounds.height -
-          this.props.builderHeight * (this.state.sectionPercentY / 100)
+          this.state.height * (this.state.sectionPercentY / 100)
         );
     } else {
       if (img.x > 0) img.x = 0;
-      if (img.y > 0 + BUILDER_HEIGHT * (this.state.sectionPercentY / 100))
-        img.y = 0 + BUILDER_HEIGHT * (this.state.sectionPercentY / 100);
+      if (img.y > 0 + this.state.height * (this.state.sectionPercentY / 100))
+        img.y = 0 + this.state.height * (this.state.sectionPercentY / 100);
 
-      if (img.x + imageBounds.width < this.props.builderWidth)
-        img.x = -(imageBounds.width - this.props.builderWidth);
-      if (img.y + imageBounds.height < this.props.builderHeight)
-        img.y = -(imageBounds.height - this.props.builderHeight);
+      if (img.x + imageBounds.width < this.state.width)
+        img.x = -(imageBounds.width - this.state.width);
+      if (img.y + imageBounds.height < this.state.height)
+        img.y = -(imageBounds.height - this.state.height);
     }
   };
 
@@ -369,10 +362,23 @@ export default class TwoDiagonal extends React.Component {
     this.handlefileDialog(imageIndex);
   };
 
+  testing = async (input, event) => {
+    this.app.renderer.resize(700, 1600);
+    await this.setState({ width: 700, height: 1600 });
+
+    this.maskPlaceholder.y =
+      this.state.height * (this.state.sectionPercentY / 100);
+
+    this.semicircle.y = this.state.height * (this.state.sectionPercentY / 100);
+  };
+
   render() {
     return (
       <div className={styles.wrapper}>
+        <button onClick={event => this.testing('test', event)}>Testing</button>
+
         <p>Double-click to open image</p>
+
         <div
           className={styles.composer}
           ref={el => (this.composer = el)}
@@ -446,7 +452,7 @@ export default class TwoDiagonal extends React.Component {
 
 TwoDiagonal.defaultProps = {
   direction: 'left',
-  builderWidth: BUILDER_WIDTH,
-  builderHeight: BUILDER_HEIGHT,
+  builderWidth: 800,
+  builderHeight: 600,
   maxZoom: 250
 };
