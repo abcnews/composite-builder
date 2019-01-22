@@ -370,17 +370,36 @@ export default class TwoDiagonal extends React.Component {
     this.handlefileDialog(imageIndex);
   };
 
-  swapOrientation = async  event => {
-    // Set state. Await bc state is async
-    await this.setState(prevState => {
-      return { width: prevState.height, height: prevState.width };
-    });
+  swapOrientation = async event => {
+    const ratio = event.target.id;
 
-    // Reset the textures (TODO: implement resize so we don't have to reload images)
+    switch (ratio) {
+      case '4x3':
+        await this.setState({ width: 800, height: 600 });
+        break;
+      case '1x1':
+        await this.setState({ width: 700, height: 700 });
+        break;
+      case '16x9':
+        await this.setState({ width: 960, height: 540 });
+        break;
+      case 'swap':
+        await this.setState(prevState => {
+          return { width: prevState.height, height: prevState.width };
+        });
+    }
+
+    // Reset the textures
+    // (TODO: implement resize so we don't have to reload images)
     this.images[0].texture = PIXI.Texture.EMPTY;
     this.images[1].texture = PIXI.Texture.EMPTY;
 
     this.app.renderer.resize(this.state.width, this.state.height);
+    this.composer.style.width = this.state.width + 'px'; // Wrap container tightly
+
+    // Reset bottom image base
+    this.images[1].baseY =
+      this.state.height * (this.state.sectionPercentY / 100);
 
     this.maskPlaceholder.y =
       this.state.height * (this.state.sectionPercentY / 100);
@@ -403,10 +422,38 @@ export default class TwoDiagonal extends React.Component {
   render() {
     return (
       <div className={styles.wrapper}>
-      <p><button className={styles.button} onClick={this.swapOrientation}>Portrait / Landscape</button></p>
+        <p>
+          <button
+            className={styles.button}
+            onClick={this.swapOrientation}
+            id={'4x3'}
+          >
+            4 x 3
+          </button>
+          <button
+            className={styles.button}
+            onClick={this.swapOrientation}
+            id={'16x9'}
+          >
+            16 x 9
+          </button>
+          <button
+            className={styles.button}
+            onClick={this.swapOrientation}
+            id={'1x1'}
+          >
+            1 x 1
+          </button>
+          <button
+            className={styles.button}
+            onClick={this.swapOrientation}
+            id={'swap'}
+          >
+            Swap X/Y
+          </button>
+        </p>
 
-
-        <p>Double-click to open image</p>
+        <p>Double-click panel to open image</p>
 
         <div
           className={styles.composer}
@@ -443,9 +490,6 @@ export default class TwoDiagonal extends React.Component {
             onChange={this.doZoom}
           />
         </div>
-
-        
-
 
         <p>
           <a
