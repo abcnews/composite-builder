@@ -2,6 +2,7 @@
 import React from 'react';
 import { render } from 'react-dom';
 import 'promise-polyfill/src/polyfill';
+import "./helpers";
 
 import App from './components/App';
 
