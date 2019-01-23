@@ -34,10 +34,6 @@ export default class TwoDiagonal extends React.Component {
   componentDidMount() {
     that = this; // To access this in dPIXI drag events
 
-    // Hackish way of accessing these in drag events
-    BUILDER_WIDTH = this.props.builderWidth;
-    BUILDER_HEIGHT = this.props.builderHeight;
-
     // Set up the sprite images
     const numberOfImages = 2;
     for (let i = 0; i < numberOfImages; i++) {
