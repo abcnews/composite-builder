@@ -11,9 +11,6 @@ import { removeHash } from '../../helpers';
 
 let that; // Later used to access class in drag events
 
-let BUILDER_WIDTH = 800;
-let BUILDER_HEIGHT = 600;
-
 export default class TwoDiagonal extends React.Component {
   state = {
     width: this.props.builderWidth,
@@ -344,10 +341,6 @@ export default class TwoDiagonal extends React.Component {
     this.app.renderer.resize(this.state.width, this.state.height);
     this.composer.style.width = this.state.width + 'px'; // Wrap container tightly
 
-    // Reset bottom image base
-    // this.images[1].baseY =
-    //   this.state.height * (this.state.sectionPercentY / 100);
-
     this.maskPlaceholder.y = this.state.height / 2;
     this.maskPlaceholder.x = this.state.width / 2;
     this.maskPlaceholder.width = Math.hypot(
@@ -359,15 +352,15 @@ export default class TwoDiagonal extends React.Component {
       this.state.height
     );
 
-    this.semicircle.y = this.state.height / 2;
-    this.semicircle.x = this.state.width / 2;
-    this.semicircle.width = Math.hypot(this.state.width, this.state.height);
-    this.semicircle.height = Math.hypot(this.state.width, this.state.height);
-
     this.maskPlaceholder.rotation =
       this.props.direction === 'left'
         ? Math.PI - Math.atan(this.state.height / this.state.width)
         : Math.atan(this.state.height / this.state.width);
+
+    this.semicircle.y = this.state.height / 2;
+    this.semicircle.x = this.state.width / 2;
+    this.semicircle.width = Math.hypot(this.state.width, this.state.height);
+    this.semicircle.height = Math.hypot(this.state.width, this.state.height);
 
     this.semicircle.rotation =
       this.props.direction === 'left'
