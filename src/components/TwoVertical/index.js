@@ -9,7 +9,7 @@ import { removeHash } from '../../helpers';
 
 let that; // Later used to access class in drag events
 
-export default class TwoDiagonal extends React.Component {
+export default class TwoVertical extends React.Component {
   state = {
     width: this.props.builderWidth,
     height: this.props.builderHeight,
@@ -354,6 +354,8 @@ export default class TwoDiagonal extends React.Component {
   };
 
   handleDoubleClick = event => {
+    event.preventDefault();
+
     let canvasTop = this.app.renderer.view.offsetTop;
     let canvasLeft = this.app.renderer.view.offsetLeft;
     let clickX = event.clientX;
@@ -376,6 +378,9 @@ export default class TwoDiagonal extends React.Component {
     switch (ratio) {
       case '4x3':
         await this.setState({ width: 800, height: 600 });
+        break;
+      case '3x2':
+        await this.setState({ width: 870, height: 580 });
         break;
       case '1x1':
         await this.setState({ width: 700, height: 700 });
@@ -429,6 +434,13 @@ export default class TwoDiagonal extends React.Component {
             id={'4x3'}
           >
             4 x 3
+          </button>
+          <button
+            className={styles.button}
+            onClick={this.swapOrientation}
+            id={'3x2'}
+          >
+            3 x 2
           </button>
           <button
             className={styles.button}
@@ -527,8 +539,7 @@ export default class TwoDiagonal extends React.Component {
   }
 } // End component
 
-TwoDiagonal.defaultProps = {
-  direction: 'left',
+TwoVertical.defaultProps = {
   builderWidth: 800,
   builderHeight: 600,
   maxZoom: 250
