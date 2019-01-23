@@ -426,6 +426,43 @@ export default class TwoVertical extends React.Component {
     this.semicircle.height = Math.hypot(this.state.width, this.state.height);
   };
 
+  sectionUp = async () => {
+    await this.setState(prevState => ({
+      sectionPercentY: prevState.sectionPercentY - 5
+    }));
+    this.redraw();
+  };
+
+  sectionDown = async () => {
+    await this.setState(prevState => ({
+      sectionPercentY: prevState.sectionPercentY + 5
+    }));
+    this.redraw();
+  };
+
+  redraw = () => {
+    console.log(this.state.sectionPercentY);
+    this.images[1].baseY =
+      this.state.height * (this.state.sectionPercentY / 100);
+
+    this.maskPlaceholder.y =
+      this.state.height * (this.state.sectionPercentY / 100);
+    // this.maskPlaceholder.x = this.state.width / 2;
+    // this.maskPlaceholder.width = Math.hypot(
+    //   this.state.width,
+    //   this.state.height
+    // );
+    // this.maskPlaceholder.height = Math.hypot(
+    //   this.state.width,
+    //   this.state.height
+    // );
+
+    this.semicircle.y = this.state.height * (this.state.sectionPercentY / 100);
+    // this.semicircle.x = this.state.width / 2;
+    // this.semicircle.width = Math.hypot(this.state.width, this.state.height);
+    // this.semicircle.height = Math.hypot(this.state.width, this.state.height);
+  };
+
   render() {
     return (
       <div className={styles.wrapper}>
@@ -438,6 +475,12 @@ export default class TwoVertical extends React.Component {
           ref={el => (this.composer = el)}
           onDoubleClick={this.handleDoubleClick}
         />
+
+        <div>
+          <button onClick={this.sectionUp}>▲</button>
+          &nbsp;&nbsp;&nbsp;
+          <button onClick={this.sectionDown}>▼</button>
+        </div>
 
         <div className={styles.scale}>
           Top scale
