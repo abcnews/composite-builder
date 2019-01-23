@@ -6,6 +6,12 @@
 .composer {
   margin: 20px auto 30px;
 
+  // Stops chrome selecting text outside div on double-click
+  -webkit-user-select: none; /* Chrome all / Safari all */
+  -moz-user-select: none; /* Firefox all */
+  -ms-user-select: none; /* IE 10+ */
+  user-select: none; /* Likely future */
+
   canvas {
     // Remove white space at bottom
     vertical-align: middle;

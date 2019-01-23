@@ -5,10 +5,11 @@ import fileDialog from 'file-dialog';
 const { detect } = require('detect-browser');
 const browser = detect();
 
+import AspectSelect from '../AspectSelect';
+
 import { removeHash } from '../../helpers';
 
-let BUILDER_WIDTH = 800;
-let BUILDER_HEIGHT = 600;
+let that; // Later used to access class in drag events
 
 export default class TwoDiagonal extends React.Component {
   state = {
@@ -31,6 +32,8 @@ export default class TwoDiagonal extends React.Component {
   maskPlaceholder = new PIXI.Graphics();
 
   componentDidMount() {
+    that = this; // To access this in dPIXI drag events
+
     // Hackish way of accessing these in drag events
     BUILDER_WIDTH = this.props.builderWidth;
     BUILDER_HEIGHT = this.props.builderHeight;
@@ -42,24 +45,23 @@ export default class TwoDiagonal extends React.Component {
     }
 
     this.app.renderer.autoResize = true;
-    this.app.renderer.resize(this.props.builderWidth, this.props.builderHeight); // Default: 800 x 600
+    this.app.renderer.resize(this.state.width, this.state.height); // Default: 800 x 600
     this.composer.appendChild(this.app.view); // Attach PIXI app
-    this.composer.style.width = this.props.builderWidth + 'px'; // Wrap container tightly
+    this.composer.style.width = this.state.width + 'px'; // Wrap container tightly
     this.app.stage.addChild(this.images[1]);
 
     // Use a placeholder for image 0
     this.maskPlaceholder.beginFill(0xcccccc);
-    this.maskPlaceholder.lineStyle(4, 0xffd900, 1);
-    this.maskPlaceholder.arc(0, 0, this.props.builderWidth, 0, Math.PI); // cx, cy, radius, startAngle, endAngle
-    this.maskPlaceholder.x = this.props.builderWidth / 2;
-    this.maskPlaceholder.y = this.props.builderHeight / 2;
+    this.maskPlaceholder.lineStyle(0, 0xffd900, 1);
+    this.maskPlaceholder.arc(0, 0, this.state.width, 0, Math.PI); // cx, cy, radius, startAngle, endAngle
+    this.maskPlaceholder.x = this.state.width / 2;
+    this.maskPlaceholder.y = this.state.height / 2;
 
     // Handle different diagonal layouts depending on props
     this.maskPlaceholder.rotation =
       this.props.direction === 'left'
-        ? Math.PI -
-          Math.atan(this.props.builderHeight / this.props.builderWidth)
-        : Math.atan(this.props.builderHeight / this.props.builderWidth);
+        ? Math.PI - Math.atan(this.state.height / this.state.width)
+        : Math.atan(this.state.height / this.state.width);
 
     // Add the placeholder
     this.app.stage.addChild(this.maskPlaceholder);
@@ -74,16 +76,15 @@ export default class TwoDiagonal extends React.Component {
     // Let's try a semi circle
     this.semicircle.beginFill(0xff0000);
     this.semicircle.lineStyle(4, 0xffd900, 1);
-    this.semicircle.arc(0, 0, this.props.builderWidth, 0, Math.PI); // cx, cy, radius, startAngle, endAngle
-    this.semicircle.x = this.props.builderWidth / 2;
-    this.semicircle.y = this.props.builderHeight / 2;
+    this.semicircle.arc(0, 0, this.state.width, 0, Math.PI); // cx, cy, radius, startAngle, endAngle
+    this.semicircle.x = this.state.width / 2;
+    this.semicircle.y = this.state.height / 2;
 
     // Handle different diagonal layouts depending on props
     this.semicircle.rotation =
       this.props.direction === 'left'
-        ? Math.PI -
-          Math.atan(this.props.builderHeight / this.props.builderWidth)
-        : Math.atan(this.props.builderHeight / this.props.builderWidth);
+        ? Math.PI - Math.atan(this.state.height / this.state.width)
+        : Math.atan(this.state.height / this.state.width);
 
     // Add to stage and then mask first image
     this.app.stage.addChild(this.semicircle);
@@ -106,10 +107,10 @@ export default class TwoDiagonal extends React.Component {
   process = texture => {
     const { width, height } = texture;
     const textureRatio = width / height;
-    const builderRatio = this.props.builderWidth / this.props.builderHeight;
+    const builderRatio = this.state.width / this.state.height;
 
-    const heightRatio = this.props.builderHeight / height;
-    const widthRatio = this.props.builderWidth / width;
+    const heightRatio = this.state.height / height;
+    const widthRatio = this.state.width / width;
 
     // Scale image so it fits on stage
     if (textureRatio > builderRatio) {
@@ -186,10 +187,10 @@ export default class TwoDiagonal extends React.Component {
       // Keep image within stage bounds
       if (this.x > 0) this.x = 0;
       if (this.y > 0) this.y = 0;
-      if (imageBounds.x + imageBounds.width < BUILDER_WIDTH)
-        this.x = -(imageBounds.width - BUILDER_WIDTH);
-      if (imageBounds.y + imageBounds.height < BUILDER_HEIGHT)
-        this.y = -(imageBounds.height - BUILDER_HEIGHT);
+      if (imageBounds.x + imageBounds.width < that.state.width)
+        this.x = -(imageBounds.width - that.state.width);
+      if (imageBounds.y + imageBounds.height < that.state.height)
+        this.y = -(imageBounds.height - that.state.height);
     }
   }
 
@@ -210,10 +211,10 @@ export default class TwoDiagonal extends React.Component {
     // Keep image within stage bounds
     if (img.x > 0) img.x = 0;
     if (img.y > 0) img.y = 0;
-    if (img.x + imageBounds.width < this.props.builderWidth)
-      img.x = -(imageBounds.width - this.props.builderWidth);
-    if (img.y + imageBounds.height < this.props.builderHeight)
-      img.y = -(imageBounds.height - this.props.builderHeight);
+    if (img.x + imageBounds.width < this.state.width)
+      img.x = -(imageBounds.width - this.state.width);
+    if (img.y + imageBounds.height < this.state.height)
+      img.y = -(imageBounds.height - this.state.height);
   };
 
   handleSave = type => event => {
@@ -310,9 +311,68 @@ export default class TwoDiagonal extends React.Component {
     this.handlefileDialog(imageIndex);
   };
 
+  aspectSelect = async event => {
+    const ratio = event.target.id;
+
+    switch (ratio) {
+      case '4x3':
+        await this.setState({ width: 800, height: 600 });
+        break;
+      case '3x2':
+        await this.setState({ width: 870, height: 580 });
+        break;
+      case '1x1':
+        await this.setState({ width: 700, height: 700 });
+        break;
+      case '16x9':
+        await this.setState({ width: 960, height: 540 });
+        break;
+      case 'swap':
+        await this.setState(prevState => {
+          return { width: prevState.height, height: prevState.width };
+        });
+    }
+
+    // Reset the textures
+    // (TODO: implement resize so we don't have to reload images)
+    this.images[0].texture = PIXI.Texture.EMPTY;
+    this.images[1].texture = PIXI.Texture.EMPTY;
+
+    this.app.renderer.resize(this.state.width, this.state.height);
+    this.composer.style.width = this.state.width + 'px'; // Wrap container tightly
+
+    this.maskPlaceholder.y = this.state.height / 2;
+    this.maskPlaceholder.x = this.state.width / 2;
+    this.maskPlaceholder.width = Math.hypot(
+      this.state.width,
+      this.state.height
+    );
+    this.maskPlaceholder.height = Math.hypot(
+      this.state.width,
+      this.state.height
+    );
+
+    this.maskPlaceholder.rotation =
+      this.props.direction === 'left'
+        ? Math.PI - Math.atan(this.state.height / this.state.width)
+        : Math.atan(this.state.height / this.state.width);
+
+    this.semicircle.y = this.state.height / 2;
+    this.semicircle.x = this.state.width / 2;
+    this.semicircle.width = Math.hypot(this.state.width, this.state.height);
+    this.semicircle.height = Math.hypot(this.state.width, this.state.height);
+
+    this.semicircle.rotation =
+      this.props.direction === 'left'
+        ? Math.PI - Math.atan(this.state.height / this.state.width)
+        : Math.atan(this.state.height / this.state.width);
+  };
+
   render() {
     return (
       <div className={styles.wrapper}>
+        <AspectSelect handler={this.aspectSelect} />
+
         <p>Double-click to open image</p>
         <div
           className={styles.composer}
@@ -387,7 +447,7 @@ export default class TwoDiagonal extends React.Component {
 
 TwoDiagonal.defaultProps = {
   direction: 'left',
-  builderWidth: BUILDER_WIDTH,
-  builderHeight: BUILDER_HEIGHT,
+  builderWidth: 800,
+  builderHeight: 600,
   maxZoom: 250
 };

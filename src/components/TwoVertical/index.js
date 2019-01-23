@@ -5,11 +5,13 @@ import fileDialog from 'file-dialog';
 const { detect } = require('detect-browser');
 const browser = detect();
 
+import AspectSelect from '../AspectSelect';
+
 import { removeHash } from '../../helpers';
 
 let that; // Later used to access class in drag events
 
-export default class TwoDiagonal extends React.Component {
+export default class TwoVertical extends React.Component {
   state = {
     width: this.props.builderWidth,
     height: this.props.builderHeight,
@@ -354,6 +356,8 @@ export default class TwoDiagonal extends React.Component {
   };
 
   handleDoubleClick = event => {
+    event.preventDefault();
+
     let canvasTop = this.app.renderer.view.offsetTop;
     let canvasLeft = this.app.renderer.view.offsetLeft;
     let clickX = event.clientX;
@@ -370,12 +374,15 @@ export default class TwoDiagonal extends React.Component {
     this.handlefileDialog(imageIndex);
   };
 
-  swapOrientation = async event => {
+  aspectSelect = async event => {
     const ratio = event.target.id;
 
     switch (ratio) {
       case '4x3':
         await this.setState({ width: 800, height: 600 });
+        break;
+      case '3x2':
+        await this.setState({ width: 870, height: 580 });
         break;
       case '1x1':
         await this.setState({ width: 700, height: 700 });
@@ -422,36 +429,7 @@ export default class TwoDiagonal extends React.Component {
   render() {
     return (
       <div className={styles.wrapper}>
-        <p>
-          <button
-            className={styles.button}
-            onClick={this.swapOrientation}
-            id={'4x3'}
-          >
-            4 x 3
-          </button>
-          <button
-            className={styles.button}
-            onClick={this.swapOrientation}
-            id={'16x9'}
-          >
-            16 x 9
-          </button>
-          <button
-            className={styles.button}
-            onClick={this.swapOrientation}
-            id={'1x1'}
-          >
-            1 x 1
-          </button>
-          <button
-            className={styles.button}
-            onClick={this.swapOrientation}
-            id={'swap'}
-          >
-            Swap X/Y
-          </button>
-        </p>
+        <AspectSelect handler={this.aspectSelect} />
 
         <p>Double-click panel to open image</p>
 
@@ -527,8 +505,7 @@ export default class TwoDiagonal extends React.Component {
   }
 } // End component
 
-TwoDiagonal.defaultProps = {
-  direction: 'left',
+TwoVertical.defaultProps = {
   builderWidth: 800,
   builderHeight: 600,
   maxZoom: 250
