@@ -5,6 +5,8 @@ import fileDialog from 'file-dialog';
 const { detect } = require('detect-browser');
 const browser = detect();
 
+import AspectSelect from '../AspectSelect';
+
 import { removeHash } from '../../helpers';
 
 let that; // Later used to access class in drag events
@@ -372,7 +374,7 @@ export default class TwoVertical extends React.Component {
     this.handlefileDialog(imageIndex);
   };
 
-  swapOrientation = async event => {
+  aspectSelect = async event => {
     const ratio = event.target.id;
 
     switch (ratio) {
@@ -427,43 +429,44 @@ export default class TwoVertical extends React.Component {
   render() {
     return (
       <div className={styles.wrapper}>
-        <p>
-          <button
+        
+          {/* <button
             className={styles.button}
-            onClick={this.swapOrientation}
+            onClick={this.aspectSelect}
             id={'4x3'}
           >
             4 x 3
           </button>
           <button
             className={styles.button}
-            onClick={this.swapOrientation}
+            onClick={this.aspectSelect}
             id={'3x2'}
           >
             3 x 2
           </button>
           <button
             className={styles.button}
-            onClick={this.swapOrientation}
+            onClick={this.aspectSelect}
             id={'16x9'}
           >
             16 x 9
           </button>
           <button
             className={styles.button}
-            onClick={this.swapOrientation}
+            onClick={this.aspectSelect}
             id={'1x1'}
           >
             1 x 1
           </button>
           <button
             className={styles.button}
-            onClick={this.swapOrientation}
+            onClick={this.aspectSelect}
             id={'swap'}
           >
             Swap X/Y
-          </button>
-        </p>
+          </button> */}
+          <AspectSelect handler={this.aspectSelect} />
+        
 
         <p>Double-click panel to open image</p>
 
