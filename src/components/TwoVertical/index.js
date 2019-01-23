@@ -429,44 +429,7 @@ export default class TwoVertical extends React.Component {
   render() {
     return (
       <div className={styles.wrapper}>
-        
-          {/* <button
-            className={styles.button}
-            onClick={this.aspectSelect}
-            id={'4x3'}
-          >
-            4 x 3
-          </button>
-          <button
-            className={styles.button}
-            onClick={this.aspectSelect}
-            id={'3x2'}
-          >
-            3 x 2
-          </button>
-          <button
-            className={styles.button}
-            onClick={this.aspectSelect}
-            id={'16x9'}
-          >
-            16 x 9
-          </button>
-          <button
-            className={styles.button}
-            onClick={this.aspectSelect}
-            id={'1x1'}
-          >
-            1 x 1
-          </button>
-          <button
-            className={styles.button}
-            onClick={this.aspectSelect}
-            id={'swap'}
-          >
-            Swap X/Y
-          </button> */}
-          <AspectSelect handler={this.aspectSelect} />
-        
+        <AspectSelect handler={this.aspectSelect} />
 
         <p>Double-click panel to open image</p>
 
