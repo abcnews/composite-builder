@@ -23,3 +23,7 @@ Authors
 
 - Colin Gourlay ([gourlay.colin@abc.net.au](mailto:gourlay.colin@abc.net.au))
 - Joshua Byrd ([byrd.joshua@abc.net.au](mailto:byrd.joshua@abc.net.au))
+
+Licence
+-------
+[MIT](https://github.com/abcnews/composite-builder/blob/master/LICENSE.md)
