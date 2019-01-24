@@ -275,6 +275,13 @@ export default class TwoVertical extends React.Component {
     if (imageIndex !== undefined) this.setState({ imageIndex: imageIndex });
   };
 
+  handleFileDropped = async (files, imageIndex = 0) => {
+    if (imageIndex !== undefined)
+      await this.setState({ imageIndex: imageIndex });
+
+    this.handleFileInput(files);
+  };
+
   handleFileInput = files => {
     if (files.length !== 1) return alert('Just give me one file please...');
 
@@ -475,17 +482,51 @@ export default class TwoVertical extends React.Component {
     }
   };
 
+  handleDragOver = event => {
+    event.stopPropagation();
+    event.preventDefault();
+    // console.log(event);
+  };
+
+  handleDrop = event => {
+    event.stopPropagation();
+    event.preventDefault();
+
+    const imageIndex = this.getImageIndex(event);
+
+    const files = event.dataTransfer.files;
+
+    this.handleFileDropped(files, imageIndex);
+  };
+
+  getImageIndex = event => {
+    let canvasTop = this.app.renderer.view.offsetTop;
+    let canvasLeft = this.app.renderer.view.offsetLeft;
+    let clickX = event.clientX;
+    let clickY = event.clientY;
+    let topOffset = window.pageYOffset;
+    let leftOffset = window.pageXOffset;
+    let clickCanvasX = clickX - canvasLeft + leftOffset;
+    let clickCanvasY = clickY - canvasTop + topOffset;
+
+    let point = new PIXI.Point(clickCanvasX, clickCanvasY);
+
+    return this.semicircle.containsPoint(point) ? 0 : 1;
+  };
+
   render() {
     return (
       <div className={styles.wrapper}>
         <AspectSelect handler={this.aspectSelect} />
 
-        <p>Double-click panel to open image</p>
+        <p>Double-click panel (or drag and drop) to open image</p>
 
         <div
           className={styles.composer}
           ref={el => (this.composer = el)}
           onDoubleClick={this.handleDoubleClick}
+          onDrop={this.handleDrop}
+          onDragOver={this.handleDragOver}
         />
 
         <div>

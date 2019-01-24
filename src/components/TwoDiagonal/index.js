@@ -32,7 +32,7 @@ export default class TwoDiagonal extends React.Component {
   maskPlaceholder = new PIXI.Graphics();
 
   componentDidMount() {
-    that = this; // To access this in dPIXI drag events
+    that = this; // To access this in PIXI drag events
 
     // Set up the sprite images
     const numberOfImages = 2;
@@ -162,6 +162,7 @@ export default class TwoDiagonal extends React.Component {
     }
   }
 
+  // Here "this" is the PIXI sprite
   onDragEnd() {
     if (this.dragging) {
       this.dragging = false;
@@ -172,21 +173,12 @@ export default class TwoDiagonal extends React.Component {
     }
   }
 
+  // Here "this" is the PIXI sprite
   onDragMove() {
     if (this.dragging) {
       var newPosition = this.data.getLocalPosition(this.parent);
       this.x = newPosition.x - this.dragPoint.x;
       this.y = newPosition.y - this.dragPoint.y;
-
-      // let imageBounds = this.getBounds();
-
-      // // Keep image within stage bounds
-      // if (this.x > 0) this.x = 0;
-      // if (this.y > 0) this.y = 0;
-      // if (imageBounds.x + imageBounds.width < that.state.width)
-      //   this.x = -(imageBounds.width - that.state.width);
-      // if (imageBounds.y + imageBounds.height < that.state.height)
-      //   this.y = -(imageBounds.height - that.state.height);
 
       that.reboundImage(this);
     }
@@ -259,11 +251,18 @@ export default class TwoDiagonal extends React.Component {
     }
   };
 
-  handlefileDialog = async imageIndex => {
+  handleFileDialog = async (imageIndex = 0) => {
     let files = await fileDialog();
     this.handleFileInput(files);
 
     if (imageIndex !== undefined) this.setState({ imageIndex: imageIndex });
+  };
+
+  handleFileDropped = async (files, imageIndex = 0) => {
+    if (imageIndex !== undefined)
+      await this.setState({ imageIndex: imageIndex });
+
+    this.handleFileInput(files);
   };
 
   handleFileInput = files => {
@@ -293,20 +292,9 @@ export default class TwoDiagonal extends React.Component {
   };
 
   handleDoubleClick = event => {
-    let canvasTop = this.app.renderer.view.offsetTop;
-    let canvasLeft = this.app.renderer.view.offsetLeft;
-    let clickX = event.clientX;
-    let clickY = event.clientY;
-    let topOffset = window.pageYOffset;
-    let leftOffset = window.pageXOffset;
-    let clickCanvasX = clickX - canvasLeft + leftOffset;
-    let clickCanvasY = clickY - canvasTop + topOffset;
+    const imageIndex = this.getImageIndex(event);
 
-    let point = new PIXI.Point(clickCanvasX, clickCanvasY);
-
-    let imageIndex = this.semicircle.containsPoint(point) ? 0 : 1;
-
-    this.handlefileDialog(imageIndex);
+    this.handleFileDialog(imageIndex);
   };
 
   aspectSelect = async event => {
@@ -408,16 +396,51 @@ export default class TwoDiagonal extends React.Component {
       image.y = -(imageBounds.height - this.state.height);
   };
 
+  handleDragOver = event => {
+    event.stopPropagation();
+    event.preventDefault();
+    // console.log(event);
+  };
+
+  handleDrop = event => {
+    event.stopPropagation();
+    event.preventDefault();
+
+    const imageIndex = this.getImageIndex(event);
+
+    const files = event.dataTransfer.files;
+
+    this.handleFileDropped(files, imageIndex);
+  };
+
+  getImageIndex = event => {
+    let canvasTop = this.app.renderer.view.offsetTop;
+    let canvasLeft = this.app.renderer.view.offsetLeft;
+    let clickX = event.clientX;
+    let clickY = event.clientY;
+    let topOffset = window.pageYOffset;
+    let leftOffset = window.pageXOffset;
+    let clickCanvasX = clickX - canvasLeft + leftOffset;
+    let clickCanvasY = clickY - canvasTop + topOffset;
+
+    let point = new PIXI.Point(clickCanvasX, clickCanvasY);
+
+    return this.semicircle.containsPoint(point) ? 0 : 1;
+  };
+
   render() {
     return (
       <div className={styles.wrapper}>
         <AspectSelect handler={this.aspectSelect} />
 
-        <p>Double-click to open image</p>
+        <p>Double-click panel (or drag and drop) to open image</p>
+
         <div
           className={styles.composer}
           ref={el => (this.composer = el)}
           onDoubleClick={this.handleDoubleClick}
+          onDrop={this.handleDrop}
+          onDragOver={this.handleDragOver}
         />
 
         <div className={styles.scale}>
