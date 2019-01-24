@@ -396,11 +396,6 @@ export default class TwoVertical extends React.Component {
         });
     }
 
-    // Reset the textures
-    // (TODO: implement resize so we don't have to reload images)
-    this.images[0].texture = PIXI.Texture.EMPTY;
-    this.images[1].texture = PIXI.Texture.EMPTY;
-
     this.app.renderer.resize(this.state.width, this.state.height);
     this.composer.style.width = this.state.width + 'px'; // Wrap container tightly
 
@@ -424,43 +419,114 @@ export default class TwoVertical extends React.Component {
     this.semicircle.x = this.state.width / 2;
     this.semicircle.width = Math.hypot(this.state.width, this.state.height);
     this.semicircle.height = Math.hypot(this.state.width, this.state.height);
+
+    this.images.forEach(image => {
+      this.rescaleImage(image);
+      this.reboundImage(image);
+    });
   };
 
   sectionUp = async () => {
-    await this.setState(prevState => ({
-      sectionPercentY: prevState.sectionPercentY - 5
-    }));
-    this.redraw();
+    await this.setState(prevState => {
+      if (prevState.sectionPercentY === 50) return { sectionPercentY: 100 / 3 };
+      if (prevState.sectionPercentY < 50)
+        return { sectionPercentY: prevState.sectionPercentY };
+      if (prevState.sectionPercentY > 50) return { sectionPercentY: 50 };
+    });
+    this.redrawPanels();
   };
 
   sectionDown = async () => {
-    await this.setState(prevState => ({
-      sectionPercentY: prevState.sectionPercentY + 5
-    }));
-    this.redraw();
+    await this.setState(prevState => {
+      if (prevState.sectionPercentY === 50)
+        return { sectionPercentY: 100 - 100 / 3 };
+      if (prevState.sectionPercentY > 50)
+        return { sectionPercentY: prevState.sectionPercentY };
+      if (prevState.sectionPercentY < 50) return { sectionPercentY: 50 };
+    });
+    this.redrawPanels();
   };
 
-  redraw = () => {
-    console.log(this.state.sectionPercentY);
+  redrawPanels = () => {
     this.images[1].baseY =
       this.state.height * (this.state.sectionPercentY / 100);
 
     this.maskPlaceholder.y =
       this.state.height * (this.state.sectionPercentY / 100);
-    // this.maskPlaceholder.x = this.state.width / 2;
-    // this.maskPlaceholder.width = Math.hypot(
-    //   this.state.width,
-    //   this.state.height
-    // );
-    // this.maskPlaceholder.height = Math.hypot(
-    //   this.state.width,
-    //   this.state.height
-    // );
 
     this.semicircle.y = this.state.height * (this.state.sectionPercentY / 100);
-    // this.semicircle.x = this.state.width / 2;
-    // this.semicircle.width = Math.hypot(this.state.width, this.state.height);
-    // this.semicircle.height = Math.hypot(this.state.width, this.state.height);
+
+    this.images.forEach(image => {
+      this.rescaleImage(image);
+      this.reboundImage(image);
+    });
+  };
+
+  rescaleImage = image => {
+    const { width, height } = image.texture.orig;
+
+    // Dont process if no image loaded
+    if (width < 2 && height < 2) return;
+
+    const textureRatio = width / height;
+
+    const topPanelHeight =
+      this.state.height * (this.state.sectionPercentY / 100);
+    const bottomPanelHeight =
+      this.state.height * (1 - this.state.sectionPercentY / 100);
+
+    const panelHeight =
+      image.name === 'top' ? topPanelHeight : bottomPanelHeight;
+
+    const panelRatio =
+      this.state.width /
+      (image.name === 'top' ? topPanelHeight : bottomPanelHeight);
+
+    const widthRatio = this.state.width / width;
+    const heightRatio = panelHeight / height;
+
+    // Scale image so it fits on stage
+    if (textureRatio > panelRatio) {
+      image.scale.set(heightRatio, heightRatio);
+      image.minScale = heightRatio;
+    } else {
+      image.scale.set(widthRatio, widthRatio);
+      image.minScale = widthRatio;
+    }
+  };
+
+  reboundImage = image => {
+    let imageBounds = image.getBounds();
+
+    // Dont process if no image loaded
+    if (imageBounds.width < 2 && imageBounds.height < 2) return;
+
+    // Top and bottom images hhave different bounding boxes
+    if (image.name === 'top') {
+      // Keep image within stage bounds
+      if (image.x > 0) image.x = 0;
+      if (image.y > 0) image.y = 0;
+
+      if (image.x + imageBounds.width < this.state.width)
+        image.x = -(imageBounds.width - this.state.width);
+      if (
+        image.y + imageBounds.height <
+        this.state.height * (this.state.sectionPercentY / 100)
+      )
+        image.y = -(
+          imageBounds.height -
+          this.state.height * (this.state.sectionPercentY / 100)
+        );
+    } else {
+      if (image.x > 0) image.x = 0;
+      if (image.y > 0 + this.state.height * (this.state.sectionPercentY / 100))
+        image.y = 0 + this.state.height * (this.state.sectionPercentY / 100);
+
+      if (image.x + imageBounds.width < this.state.width)
+        image.x = -(imageBounds.width - this.state.width);
+      if (image.y + imageBounds.height < this.state.height)
+        image.y = -(imageBounds.height - this.state.height);
+    }
   };
 
   render() {
