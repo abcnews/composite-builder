@@ -113,35 +113,6 @@ export default class TwoVertical extends React.Component {
   };
 
   process = texture => {
-    const { width, height } = texture;
-    const textureRatio = width / height;
-
-    const topPanelHeight =
-      this.state.height * (this.state.sectionPercentY / 100);
-    const bottomPanelHeight =
-      this.state.height * (1 - this.state.sectionPercentY / 100);
-
-    const panelHeight =
-      this.state.imageIndex === 0
-        ? this.state.height * (this.state.sectionPercentY / 100)
-        : this.state.height * (1 - this.state.sectionPercentY / 100);
-
-    const panelRatio =
-      this.state.width /
-      (this.state.imageIndex === 0 ? topPanelHeight : bottomPanelHeight);
-
-    const widthRatio = this.state.width / width;
-    const heightRatio = panelHeight / height;
-
-    // Scale image so it fits on stage
-    if (textureRatio > panelRatio) {
-      this.images[this.state.imageIndex].scale.set(heightRatio, heightRatio);
-      this.images[this.state.imageIndex].minScale = heightRatio;
-    } else {
-      this.images[this.state.imageIndex].scale.set(widthRatio, widthRatio);
-      this.images[this.state.imageIndex].minScale = widthRatio;
-    }
-
     // Reset our sliders to zero
     if (this.state.imageIndex === 0) this.setState({ topScale: 100 });
     else this.setState({ bottomScale: 100 });
@@ -154,6 +125,8 @@ export default class TwoVertical extends React.Component {
 
     // Load the texture into the sprite
     this.images[this.state.imageIndex].texture = texture;
+
+    this.rescaleImage(this.images[this.state.imageIndex]);
 
     // Start the animation loop
     this.app.ticker.add(delta => this.animationLoop(delta));
@@ -205,34 +178,7 @@ export default class TwoVertical extends React.Component {
       this.x = newPosition.x - this.dragPoint.x;
       this.y = newPosition.y - this.dragPoint.y;
 
-      let imageBounds = this.getBounds();
-
-      // Top and bottom images hhave different bounding boxes
-      if (this.name === 'top') {
-        // Keep top corner in bounds
-        if (this.x > 0) this.x = 0;
-        if (this.y > 0) this.y = 0;
-
-        if (imageBounds.x + imageBounds.width < that.state.width)
-          this.x = -(imageBounds.width - that.state.width);
-        if (
-          imageBounds.y + imageBounds.height <
-          that.state.height * (that.state.sectionPercentY / 100)
-        )
-          this.y = -(
-            imageBounds.height -
-            that.state.height * (that.state.sectionPercentY / 100)
-          );
-      } else {
-        if (this.x > 0) this.x = 0;
-        if (this.y > 0 + that.state.height * (that.state.sectionPercentY / 100))
-          this.y = 0 + that.state.height * (that.state.sectionPercentY / 100);
-
-        if (imageBounds.x + imageBounds.width < that.state.width)
-          this.x = -(imageBounds.width - that.state.width);
-        if (imageBounds.y + imageBounds.height < that.state.height)
-          this.y = -(imageBounds.height - that.state.height);
-      }
+      that.reboundImage(this);
     }
   }
 
@@ -250,7 +196,7 @@ export default class TwoVertical extends React.Component {
 
     let imageBounds = img.getBounds();
 
-    // Top and bottom images hhave different bounding boxes
+    // Top and bottom images have different bounding boxes
     if (img.name === 'top') {
       // Keep image within stage bounds
       if (img.x > 0) img.x = 0;
@@ -396,11 +342,6 @@ export default class TwoVertical extends React.Component {
         });
     }
 
-    // Reset the textures
-    // (TODO: implement resize so we don't have to reload images)
-    this.images[0].texture = PIXI.Texture.EMPTY;
-    this.images[1].texture = PIXI.Texture.EMPTY;
-
     this.app.renderer.resize(this.state.width, this.state.height);
     this.composer.style.width = this.state.width + 'px'; // Wrap container tightly
 
@@ -424,6 +365,114 @@ export default class TwoVertical extends React.Component {
     this.semicircle.x = this.state.width / 2;
     this.semicircle.width = Math.hypot(this.state.width, this.state.height);
     this.semicircle.height = Math.hypot(this.state.width, this.state.height);
+
+    this.images.forEach(image => {
+      this.rescaleImage(image);
+      this.reboundImage(image);
+    });
+  };
+
+  sectionUp = async () => {
+    await this.setState(prevState => {
+      if (prevState.sectionPercentY === 50) return { sectionPercentY: 100 / 3 };
+      if (prevState.sectionPercentY < 50)
+        return { sectionPercentY: prevState.sectionPercentY };
+      if (prevState.sectionPercentY > 50) return { sectionPercentY: 50 };
+    });
+    this.redrawPanels();
+  };
+
+  sectionDown = async () => {
+    await this.setState(prevState => {
+      if (prevState.sectionPercentY === 50)
+        return { sectionPercentY: 100 - 100 / 3 };
+      if (prevState.sectionPercentY > 50)
+        return { sectionPercentY: prevState.sectionPercentY };
+      if (prevState.sectionPercentY < 50) return { sectionPercentY: 50 };
+    });
+    this.redrawPanels();
+  };
+
+  redrawPanels = () => {
+    this.images[1].baseY =
+      this.state.height * (this.state.sectionPercentY / 100);
+
+    this.maskPlaceholder.y =
+      this.state.height * (this.state.sectionPercentY / 100);
+
+    this.semicircle.y = this.state.height * (this.state.sectionPercentY / 100);
+
+    this.images.forEach(image => {
+      this.rescaleImage(image);
+      this.reboundImage(image);
+    });
+  };
+
+  rescaleImage = image => {
+    const { width, height } = image.texture.orig;
+
+    // Dont process if no image loaded
+    if (width < 2 && height < 2) return;
+
+    const textureRatio = width / height;
+
+    const topPanelHeight =
+      this.state.height * (this.state.sectionPercentY / 100);
+    const bottomPanelHeight =
+      this.state.height * (1 - this.state.sectionPercentY / 100);
+
+    const panelHeight =
+      image.name === 'top' ? topPanelHeight : bottomPanelHeight;
+
+    const panelRatio =
+      this.state.width /
+      (image.name === 'top' ? topPanelHeight : bottomPanelHeight);
+
+    const widthRatio = this.state.width / width;
+    const heightRatio = panelHeight / height;
+
+    // Scale image so it fits on stage
+    if (textureRatio > panelRatio) {
+      image.scale.set(heightRatio, heightRatio);
+      image.minScale = heightRatio;
+    } else {
+      image.scale.set(widthRatio, widthRatio);
+      image.minScale = widthRatio;
+    }
+  };
+
+  reboundImage = image => {
+    let imageBounds = image.getBounds();
+
+    // Dont process if no image loaded
+    if (imageBounds.width < 2 && imageBounds.height < 2) return;
+
+    // Top and bottom images hhave different bounding boxes
+    if (image.name === 'top') {
+      // Keep image within stage bounds
+      if (image.x > 0) image.x = 0;
+      if (image.y > 0) image.y = 0;
+
+      if (image.x + imageBounds.width < this.state.width)
+        image.x = -(imageBounds.width - this.state.width);
+      if (
+        image.y + imageBounds.height <
+        this.state.height * (this.state.sectionPercentY / 100)
+      )
+        image.y = -(
+          imageBounds.height -
+          this.state.height * (this.state.sectionPercentY / 100)
+        );
+    } else {
+      if (image.x > 0) image.x = 0;
+      if (image.y > 0 + this.state.height * (this.state.sectionPercentY / 100))
+        image.y = 0 + this.state.height * (this.state.sectionPercentY / 100);
+
+      if (image.x + imageBounds.width < this.state.width)
+        image.x = -(imageBounds.width - this.state.width);
+      if (image.y + imageBounds.height < this.state.height)
+        image.y = -(imageBounds.height - this.state.height);
+    }
   };
 
   render() {
@@ -438,6 +487,12 @@ export default class TwoVertical extends React.Component {
           ref={el => (this.composer = el)}
           onDoubleClick={this.handleDoubleClick}
         />
+
+        <div>
+          <button onClick={this.sectionUp}>▲</button>
+          &nbsp;&nbsp;&nbsp;
+          <button onClick={this.sectionDown}>▼</button>
+        </div>
 
         <div className={styles.scale}>
           Top scale

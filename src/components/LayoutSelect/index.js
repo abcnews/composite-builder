@@ -25,7 +25,8 @@ export default class LayoutSelect extends React.Component {
           >
             <img width="320" src={twoImage} name={'two-image'} />
           </a>
-          <br /><strong>Original</strong>
+          <br />
+          <strong>Original</strong>
         </div>
 
         <div className={styles.layout}>
@@ -36,7 +37,8 @@ export default class LayoutSelect extends React.Component {
           >
             <img width="320" src={twoDiagonal} name={'two-diagonal'} />
           </a>
-          <br /><strong>Diagonal</strong>
+          <br />
+          <strong>Diagonal</strong>
         </div>
 
         <div className={styles.layout}>
@@ -51,7 +53,8 @@ export default class LayoutSelect extends React.Component {
               name={'two-diagonal-right'}
             />
           </a>
-          <br /><strong>Diagonal (inverse)</strong>
+          <br />
+          <strong>Diagonal (inverse)</strong>
         </div>
 
         <div className={styles.layout}>
@@ -60,16 +63,17 @@ export default class LayoutSelect extends React.Component {
             href="#two-diagonal-right"
             title="Two images split horizontally"
           >
-            <img
-              width="320"
-              src={twoVertical}
-              name={'two-vertical'}
-            />
+            <img width="320" src={twoVertical} name={'two-vertical'} />
           </a>
-          <br /><strong>Vertical</strong>
+          <br />
+          <strong>Vertical</strong>
         </div>
 
-        <div className={styles.footer}><a href="https://github.com/abcnews/composite-builder/issues">Feedback / Ideas?</a></div>
+        <div className={styles.footer}>
+          <a href="https://github.com/abcnews/composite-builder/issues">
+            Feedback / Ideas?
+          </a>
+        </div>
       </div>
     );
   }
