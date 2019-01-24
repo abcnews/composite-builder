@@ -32,12 +32,7 @@ export default class TwoDiagonal extends React.Component {
   maskPlaceholder = new PIXI.Graphics();
 
   componentDidMount() {
-    // Default disable drag and drop on document
-    // document.addEventListener('dragover', evt => evt.preventDefault());
-    // document.addEventListener('dragleave', evt => evt.preventDefault());
-    // document.addEventListener('drop', evt => evt.preventDefault());
-
-    that = this; // To access this in dPIXI drag events
+    that = this; // To access this in PIXI drag events
 
     // Set up the sprite images
     const numberOfImages = 2;
@@ -297,18 +292,7 @@ export default class TwoDiagonal extends React.Component {
   };
 
   handleDoubleClick = event => {
-    let canvasTop = this.app.renderer.view.offsetTop;
-    let canvasLeft = this.app.renderer.view.offsetLeft;
-    let clickX = event.clientX;
-    let clickY = event.clientY;
-    let topOffset = window.pageYOffset;
-    let leftOffset = window.pageXOffset;
-    let clickCanvasX = clickX - canvasLeft + leftOffset;
-    let clickCanvasY = clickY - canvasTop + topOffset;
-
-    let point = new PIXI.Point(clickCanvasX, clickCanvasY);
-
-    let imageIndex = this.semicircle.containsPoint(point) ? 0 : 1;
+    const imageIndex = this.getImageIndex(event);
 
     this.handleFileDialog(imageIndex);
   };
@@ -421,8 +405,15 @@ export default class TwoDiagonal extends React.Component {
   handleDrop = event => {
     event.stopPropagation();
     event.preventDefault();
-    console.log(event);
 
+    const imageIndex = this.getImageIndex(event);
+
+    const files = event.dataTransfer.files;
+
+    this.handleFileDropped(files, imageIndex);
+  };
+
+  getImageIndex = event => {
     let canvasTop = this.app.renderer.view.offsetTop;
     let canvasLeft = this.app.renderer.view.offsetLeft;
     let clickX = event.clientX;
@@ -434,11 +425,7 @@ export default class TwoDiagonal extends React.Component {
 
     let point = new PIXI.Point(clickCanvasX, clickCanvasY);
 
-    let imageIndex = this.semicircle.containsPoint(point) ? 0 : 1;
-
-    const files = event.dataTransfer.files;
-
-    this.handleFileDropped(files, imageIndex);
+    return this.semicircle.containsPoint(point) ? 0 : 1;
   };
 
   render() {
@@ -446,7 +433,8 @@ export default class TwoDiagonal extends React.Component {
       <div className={styles.wrapper}>
         <AspectSelect handler={this.aspectSelect} />
 
-        <p>Double-click to open image</p>
+        <p>Double-click panel (or drag and drop) to open image</p>
+
         <div
           className={styles.composer}
           ref={el => (this.composer = el)}
