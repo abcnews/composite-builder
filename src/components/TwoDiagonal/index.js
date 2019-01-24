@@ -178,15 +178,17 @@ export default class TwoDiagonal extends React.Component {
       this.x = newPosition.x - this.dragPoint.x;
       this.y = newPosition.y - this.dragPoint.y;
 
-      let imageBounds = this.getBounds();
+      // let imageBounds = this.getBounds();
 
-      // Keep image within stage bounds
-      if (this.x > 0) this.x = 0;
-      if (this.y > 0) this.y = 0;
-      if (imageBounds.x + imageBounds.width < that.state.width)
-        this.x = -(imageBounds.width - that.state.width);
-      if (imageBounds.y + imageBounds.height < that.state.height)
-        this.y = -(imageBounds.height - that.state.height);
+      // // Keep image within stage bounds
+      // if (this.x > 0) this.x = 0;
+      // if (this.y > 0) this.y = 0;
+      // if (imageBounds.x + imageBounds.width < that.state.width)
+      //   this.x = -(imageBounds.width - that.state.width);
+      // if (imageBounds.y + imageBounds.height < that.state.height)
+      //   this.y = -(imageBounds.height - that.state.height);
+
+      that.reboundImage(this);
     }
   }
 
@@ -329,11 +331,6 @@ export default class TwoDiagonal extends React.Component {
         });
     }
 
-    // Reset the textures
-    // (TODO: implement resize so we don't have to reload images)
-    this.images[0].texture = PIXI.Texture.EMPTY;
-    this.images[1].texture = PIXI.Texture.EMPTY;
-
     this.app.renderer.resize(this.state.width, this.state.height);
     this.composer.style.width = this.state.width + 'px'; // Wrap container tightly
 
@@ -362,6 +359,53 @@ export default class TwoDiagonal extends React.Component {
       this.props.direction === 'left'
         ? Math.PI - Math.atan(this.state.height / this.state.width)
         : Math.atan(this.state.height / this.state.width);
+
+    this.images.forEach(image => {
+      this.rescaleImage(image);
+      this.reboundImage(image);
+    });
+
+    // Reset sliders
+    this.setState({ topScale: 100 });
+    this.setState({ bottomScale: 100 });
+  };
+
+  rescaleImage = image => {
+    const { width, height } = image.texture.orig;
+
+    // Dont process if no image loaded
+    if (width < 2 && height < 2) return;
+
+    const textureRatio = width / height;
+    const panelHeight = this.state.height;
+    const panelRatio = this.state.width / panelHeight;
+
+    const widthRatio = this.state.width / width;
+    const heightRatio = panelHeight / height;
+
+    // Scale image so it fits on stage
+    if (textureRatio > panelRatio) {
+      image.scale.set(heightRatio, heightRatio);
+      image.minScale = heightRatio;
+    } else {
+      image.scale.set(widthRatio, widthRatio);
+      image.minScale = widthRatio;
+    }
+  };
+
+  reboundImage = image => {
+    let imageBounds = image.getBounds();
+
+    // Dont process if no image loaded
+    if (imageBounds.width < 2 && imageBounds.height < 2) return;
+
+    // Keep image within stage bounds
+    if (image.x > 0) image.x = 0;
+    if (image.y > 0) image.y = 0;
+    if (imageBounds.x + imageBounds.width < this.state.width)
+      image.x = -(imageBounds.width - this.state.width);
+    if (imageBounds.y + imageBounds.height < this.state.height)
+      image.y = -(imageBounds.height - this.state.height);
   };
 
   render() {

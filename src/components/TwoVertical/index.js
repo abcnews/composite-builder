@@ -113,35 +113,6 @@ export default class TwoVertical extends React.Component {
   };
 
   process = texture => {
-    const { width, height } = texture;
-    const textureRatio = width / height;
-
-    const topPanelHeight =
-      this.state.height * (this.state.sectionPercentY / 100);
-    const bottomPanelHeight =
-      this.state.height * (1 - this.state.sectionPercentY / 100);
-
-    const panelHeight =
-      this.state.imageIndex === 0
-        ? this.state.height * (this.state.sectionPercentY / 100)
-        : this.state.height * (1 - this.state.sectionPercentY / 100);
-
-    const panelRatio =
-      this.state.width /
-      (this.state.imageIndex === 0 ? topPanelHeight : bottomPanelHeight);
-
-    const widthRatio = this.state.width / width;
-    const heightRatio = panelHeight / height;
-
-    // Scale image so it fits on stage
-    if (textureRatio > panelRatio) {
-      this.images[this.state.imageIndex].scale.set(heightRatio, heightRatio);
-      this.images[this.state.imageIndex].minScale = heightRatio;
-    } else {
-      this.images[this.state.imageIndex].scale.set(widthRatio, widthRatio);
-      this.images[this.state.imageIndex].minScale = widthRatio;
-    }
-
     // Reset our sliders to zero
     if (this.state.imageIndex === 0) this.setState({ topScale: 100 });
     else this.setState({ bottomScale: 100 });
@@ -154,6 +125,8 @@ export default class TwoVertical extends React.Component {
 
     // Load the texture into the sprite
     this.images[this.state.imageIndex].texture = texture;
+
+    this.rescaleImage(this.images[this.state.imageIndex]);
 
     // Start the animation loop
     this.app.ticker.add(delta => this.animationLoop(delta));
@@ -205,34 +178,7 @@ export default class TwoVertical extends React.Component {
       this.x = newPosition.x - this.dragPoint.x;
       this.y = newPosition.y - this.dragPoint.y;
 
-      let imageBounds = this.getBounds();
-
-      // Top and bottom images hhave different bounding boxes
-      if (this.name === 'top') {
-        // Keep top corner in bounds
-        if (this.x > 0) this.x = 0;
-        if (this.y > 0) this.y = 0;
-
-        if (imageBounds.x + imageBounds.width < that.state.width)
-          this.x = -(imageBounds.width - that.state.width);
-        if (
-          imageBounds.y + imageBounds.height <
-          that.state.height * (that.state.sectionPercentY / 100)
-        )
-          this.y = -(
-            imageBounds.height -
-            that.state.height * (that.state.sectionPercentY / 100)
-          );
-      } else {
-        if (this.x > 0) this.x = 0;
-        if (this.y > 0 + that.state.height * (that.state.sectionPercentY / 100))
-          this.y = 0 + that.state.height * (that.state.sectionPercentY / 100);
-
-        if (imageBounds.x + imageBounds.width < that.state.width)
-          this.x = -(imageBounds.width - that.state.width);
-        if (imageBounds.y + imageBounds.height < that.state.height)
-          this.y = -(imageBounds.height - that.state.height);
-      }
+      that.reboundImage(this);
     }
   }
 
@@ -250,7 +196,7 @@ export default class TwoVertical extends React.Component {
 
     let imageBounds = img.getBounds();
 
-    // Top and bottom images hhave different bounding boxes
+    // Top and bottom images have different bounding boxes
     if (img.name === 'top') {
       // Keep image within stage bounds
       if (img.x > 0) img.x = 0;
