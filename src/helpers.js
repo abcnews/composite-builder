@@ -17,8 +17,20 @@ export function removeHash() {
   }
 }
 
-// Polyfills
+export function roundNumber(num, scale) {
+  if(!("" + num).includes("e")) {
+    return +(Math.round(num + "e+" + scale)  + "e-" + scale);
+  } else {
+    var arr = ("" + num).split("e");
+    var sig = ""
+    if(+arr[1] + scale > 0) {
+      sig = "+";
+    }
+    return +(Math.round(+arr[0] + "e" + sig + (+arr[1] + scale)) + "e-" + scale);
+  }
+}
 
+// Polyfills
 if (!Math.hypot) Math.hypot = function (x, y) {
   // https://bugzilla.mozilla.org/show_bug.cgi?id=896264#c28
   var max = 0;

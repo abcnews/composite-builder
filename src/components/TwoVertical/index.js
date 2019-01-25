@@ -9,7 +9,7 @@ const SLIDER_HEIGHT = 5;
 
 import AspectSelect from '../AspectSelect';
 
-import { removeHash } from '../../helpers';
+import { removeHash, roundNumber } from '../../helpers';
 
 let that; // Later used to access class in drag events
 
@@ -105,7 +105,7 @@ export default class TwoVertical extends React.Component {
     // set a fill and a line style again and draw a rectangle
     this.slider.lineStyle(0, 0x0000ff, 1);
     this.slider.beginFill(0xff700b, 0.0);
-    this.slider.drawRect(0, 0, this.state.width, 10);
+    this.slider.drawRect(0, 0, this.state.width, SLIDER_HEIGHT * 2);
     this.slider.x = 0;
     this.slider.y = this.state.height / 2 - SLIDER_HEIGHT;
 
@@ -244,7 +244,8 @@ export default class TwoVertical extends React.Component {
 
       // Keep within sensible bounds
       if (this.y < 0 - SLIDER_HEIGHT) this.y = 0 - SLIDER_HEIGHT;
-      if (this.y  > that.state.height - SLIDER_HEIGHT) this.y = that.state.height - SLIDER_HEIGHT;
+      if (this.y > that.state.height - SLIDER_HEIGHT)
+        this.y = that.state.height - SLIDER_HEIGHT;
 
       let newPercentageY = ((this.y + SLIDER_HEIGHT) / that.state.height) * 100;
       that.setState({ sectionPercentY: newPercentageY });
@@ -440,32 +441,15 @@ export default class TwoVertical extends React.Component {
 
     // Realign the slider
     this.slider.width = this.state.width;
-    this.slider.y = this.state.height * (this.state.sectionPercentY / 100) - SLIDER_HEIGHT;
+    this.slider.y =
+      this.state.height * (this.state.sectionPercentY / 100) - SLIDER_HEIGHT;
   };
 
-  sectionUp = async () => {
-    await this.setState(prevState => {
-      if (prevState.sectionPercentY === 50) return { sectionPercentY: 100 / 3 };
-      if (prevState.sectionPercentY < 50)
-        return { sectionPercentY: prevState.sectionPercentY };
-      if (prevState.sectionPercentY > 50) return { sectionPercentY: 50 };
-    });
+  setSectionPercent = async percent => {
+    await this.setState({ sectionPercentY: percent });
 
-    this.slider.y = this.state.height * (this.state.sectionPercentY / 100) - SLIDER_HEIGHT;
-
-    this.redrawPanels();
-  };
-
-  sectionDown = async () => {
-    await this.setState(prevState => {
-      if (prevState.sectionPercentY === 50)
-        return { sectionPercentY: 100 - 100 / 3 };
-      if (prevState.sectionPercentY > 50)
-        return { sectionPercentY: prevState.sectionPercentY };
-      if (prevState.sectionPercentY < 50) return { sectionPercentY: 50 };
-    });
-
-    this.slider.y = this.state.height * (this.state.sectionPercentY / 100) - SLIDER_HEIGHT;
+    this.slider.y =
+      this.state.height * (this.state.sectionPercentY / 100) - SLIDER_HEIGHT;
 
     this.redrawPanels();
   };
@@ -516,6 +500,10 @@ export default class TwoVertical extends React.Component {
       image.scale.set(widthRatio, widthRatio);
       image.minScale = widthRatio;
     }
+
+    // Reset sliders
+    this.setState({ topScale: 100 });
+    this.setState({ bottomScale: 100 });
   };
 
   reboundImage = image => {
@@ -555,7 +543,6 @@ export default class TwoVertical extends React.Component {
   handleDragOver = event => {
     event.stopPropagation();
     event.preventDefault();
-    // console.log(event);
   };
 
   handleDrop = event => {
@@ -600,14 +587,36 @@ export default class TwoVertical extends React.Component {
         />
 
         <div>
-          <button onClick={this.sectionUp}>▲</button>
-          &nbsp;&nbsp;&nbsp;
-          <button onClick={this.sectionDown}>▼</button>
+          <p className={styles.label}>
+            Section position {roundNumber(this.state.sectionPercentY, 0)}%
+          </p>
+
+          <button
+            onClick={() => {
+              this.setSectionPercent(100 / 3);
+            }}
+          >
+            33.3%
+          </button>
+          <button
+            onClick={() => {
+              this.setSectionPercent(50);
+            }}
+          >
+            50%
+          </button>
+          <button
+            onClick={() => {
+              this.setSectionPercent(100 - 100 / 3);
+            }}
+          >
+            66.6%
+          </button>
         </div>
 
         <div className={styles.scale}>
-          Top scale
-          <br />
+          <p className={styles.label}>Top scale</p>
+
           <input
             className={styles.slider}
             id="topZoom"
@@ -621,8 +630,8 @@ export default class TwoVertical extends React.Component {
         </div>
 
         <div className={styles.scale}>
-          Bottom scale
-          <br />
+          <p className={styles.label}>Bottom scale</p>
+
           <input
             className={styles.slider}
             id="bottomZoom"
