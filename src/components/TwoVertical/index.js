@@ -5,6 +5,8 @@ import fileDialog from 'file-dialog';
 const { detect } = require('detect-browser');
 const browser = detect();
 
+const SLIDER_HEIGHT = 5;
+
 import AspectSelect from '../AspectSelect';
 
 import { removeHash } from '../../helpers';
@@ -31,9 +33,10 @@ export default class TwoVertical extends React.Component {
 
   semicircle = new PIXI.Graphics();
   maskPlaceholder = new PIXI.Graphics();
+  slider = new PIXI.Graphics();
 
   componentDidMount() {
-    that = this; // To access this in dPIXI drag events
+    that = this; // To access this in PIXI drag events
 
     // Set up the sprite images
     const numberOfImages = 2;
@@ -97,7 +100,21 @@ export default class TwoVertical extends React.Component {
     // Add to stage and then mask first image
     this.app.stage.addChild(this.semicircle);
     this.images[0].mask = this.semicircle;
+
+    // Create a slider to control the section
+    // set a fill and a line style again and draw a rectangle
+    this.slider.lineStyle(0, 0x0000ff, 1);
+    this.slider.beginFill(0xff700b, 0.0);
+    this.slider.drawRect(0, 0, this.state.width, 10);
+    this.slider.x = 0;
+    this.slider.y = this.state.height / 2 - SLIDER_HEIGHT;
+
+    this.app.stage.addChild(this.slider);
+
+    this.sliderInit(this.slider);
   }
+
+  componentDidUpdate() {}
 
   // This is usually called by the ImageLoader component
   handleImage = image => {
@@ -136,10 +153,10 @@ export default class TwoVertical extends React.Component {
   animationLoop = delta => {};
 
   // Pass a sprite to this to enable dragging
-  draggify = obj => {
-    obj.interactive = true;
-    obj.buttonMode = true;
-    obj
+  draggify = object => {
+    object.interactive = true;
+    object.buttonMode = true;
+    object
       .on('mousedown', this.onDragStart)
       .on('touchstart', this.onDragStart)
       .on('mouseup', this.onDragEnd)
@@ -181,6 +198,60 @@ export default class TwoVertical extends React.Component {
       that.reboundImage(this);
     }
   }
+
+  sliderInit = object => {
+    object.interactive = true;
+    object.cursor = 'ns-resize';
+
+    object
+      .on('mousedown', this.onSliderDragStart)
+      .on('touchstart', this.onSliderDragStart)
+      .on('mouseup', this.onSliderDragEnd)
+      .on('mouseupoutside', this.onSliderDragEnd)
+      .on('touchend', this.onSliderDragEnd)
+      .on('touchendoutside', this.onSliderDragEnd)
+      .on('mousemove', this.onSliderDragMove)
+      .on('touchmove', this.onSliderDragMove);
+  };
+
+  onSliderDragStart(event) {
+    if (!this.dragging) {
+      this.data = event.data;
+      this.oldGroup = this.parentGroup;
+      this.dragging = true;
+
+      this.dragPoint = event.data.getLocalPosition(this.parent);
+      this.dragPoint.x -= this.x;
+      this.dragPoint.y -= this.y;
+    }
+  }
+
+  onSliderDragEnd() {
+    if (this.dragging) {
+      this.dragging = false;
+      this.parentGroup = this.oldGroup;
+
+      // set the interaction data to null
+      this.data = null;
+    }
+  }
+
+  onSliderDragMove = async function() {
+    if (this.dragging) {
+      var newPosition = this.data.getLocalPosition(this.parent);
+      // this.x = newPosition.x - this.dragPoint.x;
+      this.y = newPosition.y - this.dragPoint.y;
+
+      // Keep within sensible bounds
+      if (this.y < 0 - SLIDER_HEIGHT) this.y = 0 - SLIDER_HEIGHT;
+      if (this.y  > that.state.height - SLIDER_HEIGHT) this.y = that.state.height - SLIDER_HEIGHT;
+
+      let newPercentageY = ((this.y + SLIDER_HEIGHT) / that.state.height) * 100;
+      that.setState({ sectionPercentY: newPercentageY });
+
+      that.redrawPanels();
+    }
+  };
 
   doZoom = event => {
     let scale = event.target.value / 100;
@@ -311,18 +382,7 @@ export default class TwoVertical extends React.Component {
   handleDoubleClick = event => {
     event.preventDefault();
 
-    let canvasTop = this.app.renderer.view.offsetTop;
-    let canvasLeft = this.app.renderer.view.offsetLeft;
-    let clickX = event.clientX;
-    let clickY = event.clientY;
-    let topOffset = window.pageYOffset;
-    let leftOffset = window.pageXOffset;
-    let clickCanvasX = clickX - canvasLeft + leftOffset;
-    let clickCanvasY = clickY - canvasTop + topOffset;
-
-    let point = new PIXI.Point(clickCanvasX, clickCanvasY);
-
-    let imageIndex = this.semicircle.containsPoint(point) ? 0 : 1;
+    const imageIndex = this.getImageIndex(event);
 
     this.handlefileDialog(imageIndex);
   };
@@ -377,6 +437,10 @@ export default class TwoVertical extends React.Component {
       this.rescaleImage(image);
       this.reboundImage(image);
     });
+
+    // Realign the slider
+    this.slider.width = this.state.width;
+    this.slider.y = this.state.height * (this.state.sectionPercentY / 100) - SLIDER_HEIGHT;
   };
 
   sectionUp = async () => {
@@ -386,6 +450,9 @@ export default class TwoVertical extends React.Component {
         return { sectionPercentY: prevState.sectionPercentY };
       if (prevState.sectionPercentY > 50) return { sectionPercentY: 50 };
     });
+
+    this.slider.y = this.state.height * (this.state.sectionPercentY / 100) - SLIDER_HEIGHT;
+
     this.redrawPanels();
   };
 
@@ -397,6 +464,9 @@ export default class TwoVertical extends React.Component {
         return { sectionPercentY: prevState.sectionPercentY };
       if (prevState.sectionPercentY < 50) return { sectionPercentY: 50 };
     });
+
+    this.slider.y = this.state.height * (this.state.sectionPercentY / 100) - SLIDER_HEIGHT;
+
     this.redrawPanels();
   };
 
