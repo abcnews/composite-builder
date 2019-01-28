@@ -23,10 +23,10 @@ export default class LayoutSelect extends React.Component {
             href="#two-image"
             title="Two images side by side"
           >
-            <img width="320" src={twoImage} name={'two-image'} />
+            <img width="320" src={twoImage} name={'two-horizontal'} />
           </a>
           <br />
-          <strong>Original</strong>
+          <strong>Two by side</strong>
         </div>
 
         <div className={styles.layout}>
@@ -66,7 +66,7 @@ export default class LayoutSelect extends React.Component {
             <img width="320" src={twoVertical} name={'two-vertical'} />
           </a>
           <br />
-          <strong>Vertical</strong>
+          <strong>Two stacked</strong>
         </div>
 
         <div className={styles.footer}>
