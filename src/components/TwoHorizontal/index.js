@@ -475,8 +475,8 @@ export default class TwoHorizontal extends React.Component {
     }
 
     // Reset sliders
-    this.setState({ topScale: 100 });
-    this.setState({ bottomScale: 100 });
+    this.setState({ leftScale: 100 });
+    this.setState({ rightScale: 100 });
   };
 
   reboundImage = image => {
@@ -485,7 +485,7 @@ export default class TwoHorizontal extends React.Component {
     // Dont process if no image loaded
     if (imageBounds.width < 2 && imageBounds.height < 2) return;
 
-    // Top and bottom images have different bounding boxes
+    // Left and right images have different bounding boxes
     if (image.name === 'left') {
       // Keep image within stage bounds
       if (image.x > 0) image.x = 0;
@@ -588,7 +588,7 @@ export default class TwoHorizontal extends React.Component {
         </div>
 
         <div className={styles.scale}>
-          <p className={styles.label}>Top scale</p>
+          <p className={styles.label}>Left scale</p>
 
           <input
             className={styles.slider}
@@ -603,7 +603,7 @@ export default class TwoHorizontal extends React.Component {
         </div>
 
         <div className={styles.scale}>
-          <p className={styles.label}>Bottom scale</p>
+          <p className={styles.label}>Right scale</p>
 
           <input
             className={styles.slider}
@@ -649,7 +649,6 @@ export default class TwoHorizontal extends React.Component {
           </a>
         </p>
         <p>
-          {' '}
           <small>
             <a href="#two-image">(Looking for the old builder?)</a>
           </small>
