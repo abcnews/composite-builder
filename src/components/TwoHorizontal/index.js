@@ -5,7 +5,7 @@ import fileDialog from 'file-dialog';
 const { detect } = require('detect-browser');
 const browser = detect();
 
-const SLIDER_HEIGHT = 5;
+const SLIDER_WIDTH = 5;
 
 import AspectSelect from '../AspectSelect';
 
@@ -13,14 +13,14 @@ import { removeHash, roundNumber } from '../../helpers';
 
 let that; // Later used to access class in drag events
 
-export default class TwoVertical extends React.Component {
+export default class TwoHorizontal extends React.Component {
   state = {
     width: this.props.builderWidth,
     height: this.props.builderHeight,
     imageIndex: 0,
-    topScale: 100,
-    bottomScale: 100,
-    sectionPercentY: 50
+    leftScale: 100,
+    rightScale: 100,
+    sectionPercentX: 50
   };
 
   app = new PIXI.Application({
@@ -60,10 +60,10 @@ export default class TwoVertical extends React.Component {
       0,
       Math.PI
     ); // cx, cy, radius, startAngle, endAngle
-    this.maskPlaceholder.x = this.state.width / 2;
-    this.maskPlaceholder.y =
-      this.state.height * (this.state.sectionPercentY / 100);
-    this.maskPlaceholder.rotation = Math.PI;
+    this.maskPlaceholder.x =
+      this.state.width * (this.state.sectionPercentX / 100);
+    this.maskPlaceholder.y = this.state.height / 2;
+    this.maskPlaceholder.rotation = Math.PI / 2;
 
     // Add the placeholder
     this.app.stage.addChild(this.maskPlaceholder);
@@ -76,12 +76,12 @@ export default class TwoVertical extends React.Component {
     this.draggify(this.images[1]);
 
     // Name images to check later for dragging and zoom bounds
-    this.images[0].name = 'top';
-    this.images[1].name = 'bottom';
+    this.images[0].name = 'left';
+    this.images[1].name = 'right';
 
-    this.images[0].baseY = 0;
-    this.images[1].baseY =
-      this.state.height * (this.state.sectionPercentY / 100);
+    this.images[0].baseX = 0;
+    this.images[1].baseX =
+      this.state.width * (this.state.sectionPercentX / 100);
 
     // Let's try a semi circle
     this.semicircle.beginFill(0xff0000);
@@ -93,9 +93,9 @@ export default class TwoVertical extends React.Component {
       0,
       Math.PI
     ); // cx, cy, radius, startAngle, endAngle
-    this.semicircle.x = this.state.width / 2;
-    this.semicircle.y = this.state.height * (this.state.sectionPercentY / 100);
-    this.semicircle.rotation = Math.PI;
+    this.semicircle.x = this.state.width * (this.state.sectionPercentX / 100);
+    this.semicircle.y = this.state.height / 2;
+    this.semicircle.rotation = Math.PI / 2; // Vertical
 
     // Add to stage and then mask first image
     this.app.stage.addChild(this.semicircle);
@@ -105,9 +105,9 @@ export default class TwoVertical extends React.Component {
     // set a fill and a line style again and draw a rectangle
     this.slider.lineStyle(0, 0x0000ff, 1);
     this.slider.beginFill(0xff700b, 0.0);
-    this.slider.drawRect(0, 0, this.state.width, SLIDER_HEIGHT * 2);
-    this.slider.x = 0;
-    this.slider.y = this.state.height / 2 - SLIDER_HEIGHT;
+    this.slider.drawRect(0, 0, SLIDER_WIDTH * 2, this.state.height);
+    this.slider.x = this.state.width / 2 - SLIDER_WIDTH;
+    this.slider.y = 0;
 
     this.app.stage.addChild(this.slider);
 
@@ -131,14 +131,14 @@ export default class TwoVertical extends React.Component {
 
   process = texture => {
     // Reset our sliders to zero
-    if (this.state.imageIndex === 0) this.setState({ topScale: 100 });
-    else this.setState({ bottomScale: 100 });
+    if (this.state.imageIndex === 0) this.setState({ leftScale: 100 });
+    else this.setState({ rightScale: 100 });
 
     // Reposition image up top
-    this.images[this.state.imageIndex].x = 0;
-    this.images[this.state.imageIndex].y = this.images[
+    this.images[this.state.imageIndex].x = this.images[
       this.state.imageIndex
-    ].baseY;
+    ].baseX;
+    this.images[this.state.imageIndex].y = 0;
 
     // Load the texture into the sprite
     this.images[this.state.imageIndex].texture = texture;
@@ -201,7 +201,7 @@ export default class TwoVertical extends React.Component {
 
   sliderInit = object => {
     object.interactive = true;
-    object.cursor = 'ns-resize';
+    object.cursor = 'ew-resize';
 
     object
       .on('mousedown', this.onSliderDragStart)
@@ -239,16 +239,16 @@ export default class TwoVertical extends React.Component {
   onSliderDragMove = async function() {
     if (this.dragging) {
       var newPosition = this.data.getLocalPosition(this.parent);
-      // this.x = newPosition.x - this.dragPoint.x;
-      this.y = newPosition.y - this.dragPoint.y;
+      this.x = newPosition.x - this.dragPoint.x;
+      // this.y = newPosition.y - this.dragPoint.y;
 
       // Keep within sensible bounds
-      if (this.y < 0 - SLIDER_HEIGHT) this.y = 0 - SLIDER_HEIGHT;
-      if (this.y > that.state.height - SLIDER_HEIGHT)
-        this.y = that.state.height - SLIDER_HEIGHT;
+      if (this.x < 0 - SLIDER_WIDTH) this.x = 0 - SLIDER_WIDTH;
+      if (this.x > that.state.width - SLIDER_WIDTH)
+        this.x = that.state.width - SLIDER_WIDTH;
 
-      let newPercentageY = ((this.y + SLIDER_HEIGHT) / that.state.height) * 100;
-      that.setState({ sectionPercentY: newPercentageY });
+      let newPercentageX = ((this.x + SLIDER_WIDTH) / that.state.width) * 100;
+      that.setState({ sectionPercentX: newPercentageX });
 
       that.redrawPanels();
     }
@@ -256,44 +256,19 @@ export default class TwoVertical extends React.Component {
 
   doZoom = event => {
     let scale = event.target.value / 100;
-    let img = event.target.id === 'topZoom' ? this.images[0] : this.images[1];
+    let img = event.target.id === 'leftZoom' ? this.images[0] : this.images[1];
 
     // Update state so we can zero scale on image reload
-    if (event.target.id === 'topZoom')
-      this.setState({ topScale: event.target.value });
-    else this.setState({ bottomScale: event.target.value });
+    if (event.target.id === 'leftZoom')
+      this.setState({ leftScale: event.target.value });
+    else this.setState({ rightScale: event.target.value });
 
     img.scale.x = img.minScale * scale; //+ (scale / 100 - 0.01);
     img.scale.y = img.minScale * scale; //+ (scale / 100 - 0.01);
 
     let imageBounds = img.getBounds();
 
-    // Top and bottom images have different bounding boxes
-    if (img.name === 'top') {
-      // Keep image within stage bounds
-      if (img.x > 0) img.x = 0;
-      if (img.y > 0) img.y = 0;
-
-      if (img.x + imageBounds.width < this.state.width)
-        img.x = -(imageBounds.width - this.state.width);
-      if (
-        img.y + imageBounds.height <
-        this.state.height * (this.state.sectionPercentY / 100)
-      )
-        img.y = -(
-          imageBounds.height -
-          this.state.height * (this.state.sectionPercentY / 100)
-        );
-    } else {
-      if (img.x > 0) img.x = 0;
-      if (img.y > 0 + this.state.height * (this.state.sectionPercentY / 100))
-        img.y = 0 + this.state.height * (this.state.sectionPercentY / 100);
-
-      if (img.x + imageBounds.width < this.state.width)
-        img.x = -(imageBounds.width - this.state.width);
-      if (img.y + imageBounds.height < this.state.height)
-        img.y = -(imageBounds.height - this.state.height);
-    }
+    this.reboundImage(img);
   };
 
   handleSave = type => event => {
@@ -414,12 +389,12 @@ export default class TwoVertical extends React.Component {
     this.composer.style.width = this.state.width + 'px'; // Wrap container tightly
 
     // Reset bottom image base
-    this.images[1].baseY =
-      this.state.height * (this.state.sectionPercentY / 100);
+    this.images[1].baseX =
+      this.state.width * (this.state.sectionPercentX / 100);
 
-    this.maskPlaceholder.y =
-      this.state.height * (this.state.sectionPercentY / 100);
-    this.maskPlaceholder.x = this.state.width / 2;
+    this.maskPlaceholder.y = this.state.height / 2;
+    this.maskPlaceholder.x =
+      this.state.width * (this.state.sectionPercentX / 100);
     this.maskPlaceholder.width = Math.hypot(
       this.state.width,
       this.state.height
@@ -429,8 +404,8 @@ export default class TwoVertical extends React.Component {
       this.state.height
     );
 
-    this.semicircle.y = this.state.height * (this.state.sectionPercentY / 100);
-    this.semicircle.x = this.state.width / 2;
+    this.semicircle.y = this.state.height / 2;
+    this.semicircle.x = this.state.width * (this.state.sectionPercentX / 100);
     this.semicircle.width = Math.hypot(this.state.width, this.state.height);
     this.semicircle.height = Math.hypot(this.state.width, this.state.height);
 
@@ -440,28 +415,28 @@ export default class TwoVertical extends React.Component {
     });
 
     // Realign the slider
-    this.slider.width = this.state.width;
-    this.slider.y =
-      this.state.height * (this.state.sectionPercentY / 100) - SLIDER_HEIGHT;
+    this.slider.height = this.state.height;
+    this.slider.x =
+      this.state.width * (this.state.sectionPercentX / 100) - SLIDER_WIDTH;
   };
 
   setSectionPercent = async percent => {
-    await this.setState({ sectionPercentY: percent });
+    await this.setState({ sectionPercentX: percent });
 
-    this.slider.y =
-      this.state.height * (this.state.sectionPercentY / 100) - SLIDER_HEIGHT;
+    this.slider.x =
+      this.state.width * (this.state.sectionPercentX / 100) - SLIDER_WIDTH;
 
     this.redrawPanels();
   };
 
   redrawPanels = () => {
-    this.images[1].baseY =
-      this.state.height * (this.state.sectionPercentY / 100);
+    this.images[1].baseX =
+      this.state.width * (this.state.sectionPercentX / 100);
 
-    this.maskPlaceholder.y =
-      this.state.height * (this.state.sectionPercentY / 100);
+    this.maskPlaceholder.x =
+      this.state.width * (this.state.sectionPercentX / 100);
 
-    this.semicircle.y = this.state.height * (this.state.sectionPercentY / 100);
+    this.semicircle.x = this.state.width * (this.state.sectionPercentX / 100);
 
     this.images.forEach(image => {
       this.rescaleImage(image);
@@ -477,20 +452,18 @@ export default class TwoVertical extends React.Component {
 
     const textureRatio = width / height;
 
-    const topPanelHeight =
-      this.state.height * (this.state.sectionPercentY / 100);
-    const bottomPanelHeight =
-      this.state.height * (1 - this.state.sectionPercentY / 100);
+    const leftPanelWidth =
+      this.state.width * (this.state.sectionPercentX / 100);
+    const rightPanelWidth =
+      this.state.width * (1 - this.state.sectionPercentX / 100);
 
-    const panelHeight =
-      image.name === 'top' ? topPanelHeight : bottomPanelHeight;
+    const panelWidth = image.name === 'left' ? leftPanelWidth : rightPanelWidth;
 
     const panelRatio =
-      this.state.width /
-      (image.name === 'top' ? topPanelHeight : bottomPanelHeight);
-
-    const widthRatio = this.state.width / width;
-    const heightRatio = panelHeight / height;
+      (image.name === 'left' ? leftPanelWidth : rightPanelWidth) /
+      this.state.height;
+    const widthRatio = panelWidth / width;
+    const heightRatio = this.state.height / height;
 
     // Scale image so it fits on stage
     if (textureRatio > panelRatio) {
@@ -502,8 +475,8 @@ export default class TwoVertical extends React.Component {
     }
 
     // Reset sliders
-    this.setState({ topScale: 100 });
-    this.setState({ bottomScale: 100 });
+    this.setState({ leftScale: 100 });
+    this.setState({ rightScale: 100 });
   };
 
   reboundImage = image => {
@@ -512,26 +485,26 @@ export default class TwoVertical extends React.Component {
     // Dont process if no image loaded
     if (imageBounds.width < 2 && imageBounds.height < 2) return;
 
-    // Top and bottom images hhave different bounding boxes
-    if (image.name === 'top') {
+    // Left and right images have different bounding boxes
+    if (image.name === 'left') {
       // Keep image within stage bounds
       if (image.x > 0) image.x = 0;
       if (image.y > 0) image.y = 0;
 
-      if (image.x + imageBounds.width < this.state.width)
-        image.x = -(imageBounds.width - this.state.width);
       if (
-        image.y + imageBounds.height <
-        this.state.height * (this.state.sectionPercentY / 100)
+        image.x + imageBounds.width <
+        this.state.width * (this.state.sectionPercentX / 100)
       )
-        image.y = -(
-          imageBounds.height -
-          this.state.height * (this.state.sectionPercentY / 100)
+        image.x = -(
+          imageBounds.width -
+          this.state.width * (this.state.sectionPercentX / 100)
         );
+      if (image.y + imageBounds.height < this.state.height)
+        image.y = -(imageBounds.height - this.state.height);
     } else {
-      if (image.x > 0) image.x = 0;
-      if (image.y > 0 + this.state.height * (this.state.sectionPercentY / 100))
-        image.y = 0 + this.state.height * (this.state.sectionPercentY / 100);
+      if (image.x > 0 + this.state.width * (this.state.sectionPercentX / 100))
+        image.x = 0 + this.state.width * (this.state.sectionPercentX / 100);
+      if (image.y > 0) image.y = 0;
 
       if (image.x + imageBounds.width < this.state.width)
         image.x = -(imageBounds.width - this.state.width);
@@ -588,7 +561,7 @@ export default class TwoVertical extends React.Component {
 
         <div>
           <p className={styles.label}>
-            Section position {roundNumber(this.state.sectionPercentY, 0)}%
+            Section position {roundNumber(this.state.sectionPercentX, 0)}%
           </p>
 
           <button
@@ -615,31 +588,31 @@ export default class TwoVertical extends React.Component {
         </div>
 
         <div className={styles.scale}>
-          <p className={styles.label}>Top scale</p>
+          <p className={styles.label}>Left scale</p>
 
           <input
             className={styles.slider}
-            id="topZoom"
+            id="leftZoom"
             type="range"
             min="100"
             max={this.props.maxZoom}
             step="1"
-            value={this.state.topScale}
+            value={this.state.leftScale}
             onChange={this.doZoom}
           />
         </div>
 
         <div className={styles.scale}>
-          <p className={styles.label}>Bottom scale</p>
+          <p className={styles.label}>Right scale</p>
 
           <input
             className={styles.slider}
-            id="bottomZoom"
+            id="rightZoom"
             type="range"
             min="100"
             max={this.props.maxZoom}
             step="1"
-            value={this.state.bottomScale}
+            value={this.state.rightScale}
             onChange={this.doZoom}
           />
         </div>
@@ -675,12 +648,17 @@ export default class TwoVertical extends React.Component {
             Return to layout selection
           </a>
         </p>
+        <p>
+          <small>
+            <a href="#two-image">(Looking for the old builder?)</a>
+          </small>
+        </p>
       </div>
     );
   }
 } // End component
 
-TwoVertical.defaultProps = {
+TwoHorizontal.defaultProps = {
   builderWidth: 800,
   builderHeight: 600,
   maxZoom: 250

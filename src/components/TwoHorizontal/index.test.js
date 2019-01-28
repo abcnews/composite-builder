@@ -1,11 +1,11 @@
 import React from 'react';
 import renderer from 'react-test-renderer';
 
-import ImageLoader from '.';
+import TwoHorizontal from '.';
 
-describe('ImageLoader', () => {
+describe('TwoHorizontal', () => {
   test('It renders', () => {
-    const component = renderer.create(<ImageLoader />);
+    const component = renderer.create(<TwoHorizontal />);
 
     let tree = component.toJSON();
     expect(tree).toMatchSnapshot();

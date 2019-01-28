@@ -87,7 +87,7 @@ export default class TwoDiagonal extends React.Component {
     this.images[0].mask = this.semicircle;
   }
 
-  // This is usually called by the ImageLoader component
+  // Called when an image is loaded
   handleImage = image => {
     const src = PIXI.loader.resources[image.src];
 
