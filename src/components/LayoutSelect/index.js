@@ -26,7 +26,7 @@ export default class LayoutSelect extends React.Component {
             <img width="320" src={twoImage} name={'two-horizontal'} />
           </a>
           <br />
-          <strong>Two by side</strong>
+          <strong>Two side by side</strong>
         </div>
 
         <div className={styles.layout}>
