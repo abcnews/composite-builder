@@ -116,7 +116,7 @@ export default class TwoVertical extends React.Component {
 
   componentDidUpdate() {}
 
-  // This is usually called by the ImageLoader component
+  // Called when an image is loaded
   handleImage = image => {
     const src = PIXI.loader.resources[image.src];
 
