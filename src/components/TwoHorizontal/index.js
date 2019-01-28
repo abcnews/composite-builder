@@ -415,9 +415,9 @@ export default class TwoHorizontal extends React.Component {
     });
 
     // Realign the slider
-    this.slider.width = this.state.width;
-    this.slider.y =
-      this.state.height * (this.state.sectionPercentY / 100) - SLIDER_WIDTH;
+    this.slider.height = this.state.height;
+    this.slider.x =
+      this.state.width * (this.state.sectionPercentX / 100) - SLIDER_WIDTH;
   };
 
   setSectionPercent = async percent => {
