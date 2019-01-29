@@ -7,6 +7,7 @@ import TwoImage from '../TwoImage';
 import TwoDiagonal from '../TwoDiagonal';
 import TwoVertical from '../TwoVertical';
 import TwoHorizontal from '../TwoHorizontal';
+import ThreeHorizontal from '../ThreeHorizontal';
 
 export default class App extends React.Component {
   state = {
@@ -44,8 +45,9 @@ export default class App extends React.Component {
     return (
       <div className={styles.wrapper}>
         {this.state.view === 'layout-select' && <LayoutSelect />}
-        {this.state.view === 'two-horizontal' && <TwoHorizontal />}
         {this.state.view === 'two-image' && <TwoImage />}
+        {this.state.view === 'two-horizontal' && <TwoHorizontal />}
+        {this.state.view === 'three-horizontal' && <ThreeHorizontal />}
         {this.state.view === 'two-diagonal' && <TwoDiagonal />}
         {this.state.view === 'two-diagonal-right' && (
           <TwoDiagonal direction={'right'} />

@@ -3,6 +3,7 @@ const styles = require('./styles.scss');
 
 // Import images
 const twoImage = require('./images/two-image.jpg');
+const threeHorizontal = require('./images/three-horizontal.jpg');
 const twoDiagonal = require('./images/two-diagonal.jpg');
 const twoDiagonalRight = require('./images/two-diagonal-right.jpg');
 const twoVertical = require('./images/two-vertical.jpg');
@@ -20,13 +21,21 @@ export default class LayoutSelect extends React.Component {
         <div className={styles.layout}>
           <a
             onClick={this.handleClick}
-            href="#two-image"
+            href="#two-horizontal"
             title="Two images side by side"
           >
             <img width="320" src={twoImage} name={'two-horizontal'} />
           </a>
-          <br />
-          <strong>Two side by side</strong>
+        </div>
+
+        <div className={styles.layout}>
+          <a
+            onClick={this.handleClick}
+            href="#three-horizontal"
+            title="Three images side by side"
+          >
+            <img width="320" src={threeHorizontal} name={'three-horizontal'} />
+          </a>
         </div>
 
         <div className={styles.layout}>
@@ -37,8 +46,6 @@ export default class LayoutSelect extends React.Component {
           >
             <img width="320" src={twoDiagonal} name={'two-diagonal'} />
           </a>
-          <br />
-          <strong>Diagonal</strong>
         </div>
 
         <div className={styles.layout}>
@@ -53,8 +60,6 @@ export default class LayoutSelect extends React.Component {
               name={'two-diagonal-right'}
             />
           </a>
-          <br />
-          <strong>Diagonal (inverse)</strong>
         </div>
 
         <div className={styles.layout}>
@@ -65,8 +70,6 @@ export default class LayoutSelect extends React.Component {
           >
             <img width="320" src={twoVertical} name={'two-vertical'} />
           </a>
-          <br />
-          <strong>Two stacked</strong>
         </div>
 
         <div className={styles.footer}>
