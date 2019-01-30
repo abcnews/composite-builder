@@ -18,18 +18,26 @@ export default class ThreeHorizontal extends React.Component {
     width: this.props.builderWidth,
     height: this.props.builderHeight,
     imageIndex: 0,
-    leftScale: 100,
-    rightScale: 100,
+    image1Scale: 100,
+    image2Scale: 100,
+    image3Scale: 100,
     sectionPercentX: 50,
-    panel1: [0, 0, this.props.builderWidth / 3, this.props.builderHeight],
-    panel2: [
-      this.props.builderWidth / 3,
+    section1: 1 / 3,
+    section2: 2 / 3,
+    panel1: [
       0,
-      this.props.builderWidth * (2 / 3),
+      0,
+      Math.round(this.props.builderWidth / 3),
+      this.props.builderHeight
+    ],
+    panel2: [
+      Math.round(this.props.builderWidth / 3),
+      0,
+      Math.round(this.props.builderWidth * (2 / 3)),
       this.props.builderHeight
     ],
     panel3: [
-      this.props.builderWidth * (2 / 3),
+      Math.round(this.props.builderWidth * (2 / 3)),
       0,
       this.props.builderWidth,
       this.props.builderHeight
@@ -65,9 +73,9 @@ export default class ThreeHorizontal extends React.Component {
     this.composer.style.width = this.state.width + 'px'; // Wrap container tightly
 
     // Add images to stage
-    this.app.stage.addChild(this.images[2]);
-    this.app.stage.addChild(this.images[1]);
     this.app.stage.addChild(this.images[0]);
+    this.app.stage.addChild(this.images[1]);
+    this.app.stage.addChild(this.images[2]);
 
     // Enable iamge dragging
     this.draggify(this.images[0]);
@@ -84,31 +92,33 @@ export default class ThreeHorizontal extends React.Component {
     this.images[0].y = this.state.panel1[1];
     this.images[0].width = this.state.panel1[2] - this.state.panel1[0];
     this.images[0].height = this.state.panel1[3] - this.state.panel1[1];
-    this.images[0].tint = 0x243366;
+    this.images[0].tint = 0xdcdcdc;
 
-    this.images[1].x = this.state.panel2[0] - 1;
+    this.images[1].x = this.state.panel2[0];
     this.images[1].y = this.state.panel2[1];
-    this.images[1].width = this.state.panel2[2] - this.state.panel2[0] + 1;
+    this.images[1].width = this.state.panel2[2] - this.state.panel2[0];
     this.images[1].height = this.state.panel2[3] - this.state.panel2[1];
-    this.images[1].tint = 0x943366;
+    this.images[1].tint = 0xc0c0c0;
 
     this.images[2].x = this.state.panel3[0];
     this.images[2].y = this.state.panel3[1];
     this.images[2].width = this.state.panel3[2] - this.state.panel3[0];
     this.images[2].height = this.state.panel3[3] - this.state.panel3[1];
-    this.images[2].tint = 0x449366;
+    this.images[2].tint = 0xa9a9a9;
 
     // Add panels for masking
-    this.panels[0].beginFill(0x2da3ce);
-    this.panels[1].beginFill(0xcc2a93);
-    this.panels[2].beginFill(0x4dc159);
+    this.panels[0].beginFill(0x111111);
+    this.panels[1].beginFill(0x111111);
+    this.panels[2].beginFill(0x111111);
 
     // Use initial state to construct the panels
-    // Here we use the spread syntax to remove the [] from the array
-    // and parse as arguments
     this.panels[0].drawRect(...this.state.panel1);
-    this.panels[1].drawRect(...this.state.panel2);
-    this.panels[2].drawRect(...this.state.panel3);
+    this.panels[1].drawRect(...this.state.panel1);
+    this.panels[2].drawRect(...this.state.panel1);
+
+    // Offset initial panels instead of drawing them offsetted (is that a word?)
+    this.panels[1].x = Math.round(this.state.width * this.state.section1);
+    this.panels[2].x = Math.round(this.state.width * this.state.section2);
 
     // Add panels to stage
     this.panels.forEach(panel => {
@@ -203,13 +213,18 @@ export default class ThreeHorizontal extends React.Component {
     this.images[this.state.imageIndex].texture = texture;
 
     this.rescaleImage(this.images[this.state.imageIndex]);
+    this.reZoom(this.images[this.state.imageIndex]);
+    this.reboundImage(this.images[this.state.imageIndex]);
+
+    // Remove initial tint
+    this.images[this.state.imageIndex].tint = 0xffffff;
 
     // Start the animation loop
-    this.app.ticker.add(delta => this.animationLoop(delta));
+    // this.app.ticker.add(delta => this.animationLoop(delta));
   };
 
   // Use this if we require PIXI animations
-  animationLoop = delta => {};
+  // animationLoop = delta => {};
 
   // Pass a sprite to this to enable dragging
   draggify = object => {
@@ -249,6 +264,8 @@ export default class ThreeHorizontal extends React.Component {
   }
 
   onDragMove() {
+    if (this.tint !== 0xffffff) return;
+
     if (this.dragging) {
       var newPosition = this.data.getLocalPosition(this.parent);
       this.x = newPosition.x - this.dragPoint.x;
@@ -315,19 +332,36 @@ export default class ThreeHorizontal extends React.Component {
 
   doZoom = event => {
     let scale = event.target.value / 100;
-    let img = event.target.id === 'leftZoom' ? this.images[0] : this.images[1];
+    let img;
 
     // Update state so we can zero scale on image reload
-    if (event.target.id === 'leftZoom')
-      this.setState({ leftScale: event.target.value });
-    else this.setState({ rightScale: event.target.value });
+    if (event.target.id === 'image1Zoom') {
+      img = this.images[0];
+      this.setState({ image1Scale: event.target.value });
+    } else if (event.target.id === 'image2Zoom') {
+      img = this.images[1];
+      this.setState({ image2Scale: event.target.value });
+    } else if (event.target.id === 'image3Zoom') {
+      img = this.images[2];
+      this.setState({ image3Scale: event.target.value });
+    }
+
+    // Used to reZoom
+    img.lastKnownZoom = event.target.value;
+
+    // Abort if no image loaded
+    if (img.tint !== 0xffffff) return;
 
     img.scale.x = img.minScale * scale; //+ (scale / 100 - 0.01);
     img.scale.y = img.minScale * scale; //+ (scale / 100 - 0.01);
 
-    let imageBounds = img.getBounds();
-
     this.reboundImage(img);
+  };
+
+  reZoom = image => {
+    let scale = image.lastKnownZoom / 100 || 1;
+    image.scale.x = image.minScale * scale;
+    image.scale.y = image.minScale * scale;
   };
 
   handleSave = type => event => {
@@ -463,10 +497,10 @@ export default class ThreeHorizontal extends React.Component {
     //   this.state.height
     // );
 
-    this.semicircle.y = this.state.height / 2;
-    this.semicircle.x = this.state.width * (this.state.sectionPercentX / 100);
-    this.semicircle.width = Math.hypot(this.state.width, this.state.height);
-    this.semicircle.height = Math.hypot(this.state.width, this.state.height);
+    // this.semicircle.y = this.state.height / 2;
+    // this.semicircle.x = this.state.width * (this.state.sectionPercentX / 100);
+    // this.semicircle.width = Math.hypot(this.state.width, this.state.height);
+    // this.semicircle.height = Math.hypot(this.state.width, this.state.height);
 
     this.images.forEach(image => {
       this.rescaleImage(image);
@@ -474,9 +508,9 @@ export default class ThreeHorizontal extends React.Component {
     });
 
     // Realign the slider
-    this.slider.height = this.state.height;
-    this.slider.x =
-      this.state.width * (this.state.sectionPercentX / 100) - SLIDER_WIDTH;
+    // this.slider.height = this.state.height;
+    // this.slider.x =
+    //   this.state.width * (this.state.sectionPercentX / 100) - SLIDER_WIDTH;
   };
 
   setSectionPercent = async percent => {
@@ -495,7 +529,7 @@ export default class ThreeHorizontal extends React.Component {
     // this.maskPlaceholder.x =
     //   this.state.width * (this.state.sectionPercentX / 100);
 
-    this.semicircle.x = this.state.width * (this.state.sectionPercentX / 100);
+    // this.semicircle.x = this.state.width * (this.state.sectionPercentX / 100);
 
     this.images.forEach(image => {
       this.rescaleImage(image);
@@ -507,20 +541,21 @@ export default class ThreeHorizontal extends React.Component {
     const { width, height } = image.texture.orig;
 
     // Dont process if no image loaded
-    if (width < 2 && height < 2) return;
+    // if (width < 2 && height < 2) return;
+    // if (image.tint !== 0xFFFFFF) return;
 
     const textureRatio = width / height;
 
-    const leftPanelWidth =
-      this.state.width * (this.state.sectionPercentX / 100);
-    const rightPanelWidth =
-      this.state.width * (1 - this.state.sectionPercentX / 100);
+    // const leftPanelWidth =
+    //   this.state.width * (this.state.sectionPercentX / 100);
+    // const rightPanelWidth =
+    //   this.state.width * (1 - this.state.sectionPercentX / 100);
 
-    const panelWidth = image.name === 'left' ? leftPanelWidth : rightPanelWidth;
+    // const panelWidth = image.name === 'left' ? leftPanelWidth : rightPanelWidth;
 
-    const panelRatio =
-      (image.name === 'left' ? leftPanelWidth : rightPanelWidth) /
-      this.state.height;
+    const panelWidth = image.mask.width || this.state.width / 3;
+
+    const panelRatio = panelWidth / this.state.height;
     const widthRatio = panelWidth / width;
     const heightRatio = this.state.height / height;
 
@@ -539,37 +574,18 @@ export default class ThreeHorizontal extends React.Component {
   };
 
   reboundImage = image => {
-    let imageBounds = image.getBounds();
+    const imageBounds = image.getBounds();
+    const panelBounds = image.mask.getBounds();
 
-    // Dont process if no image loaded
-    if (imageBounds.width < 2 && imageBounds.height < 2) return;
+    if (imageBounds.x > panelBounds.x) image.x = panelBounds.x;
+    if (imageBounds.y > panelBounds.y) image.y = panelBounds.y;
 
-    // Left and right images have different bounding boxes
-    if (image.name === 'left') {
-      // Keep image within stage bounds
-      if (image.x > 0) image.x = 0;
-      if (image.y > 0) image.y = 0;
-
-      if (
-        image.x + imageBounds.width <
-        this.state.width * (this.state.sectionPercentX / 100)
-      )
-        image.x = -(
-          imageBounds.width -
-          this.state.width * (this.state.sectionPercentX / 100)
-        );
-      if (image.y + imageBounds.height < this.state.height)
-        image.y = -(imageBounds.height - this.state.height);
-    } else {
-      if (image.x > 0 + this.state.width * (this.state.sectionPercentX / 100))
-        image.x = 0 + this.state.width * (this.state.sectionPercentX / 100);
-      if (image.y > 0) image.y = 0;
-
-      if (image.x + imageBounds.width < this.state.width)
-        image.x = -(imageBounds.width - this.state.width);
-      if (image.y + imageBounds.height < this.state.height)
-        image.y = -(imageBounds.height - this.state.height);
+    if (imageBounds.x + imageBounds.width < panelBounds.x + panelBounds.width) {
+      image.x = -(imageBounds.width - panelBounds.width) + panelBounds.x;
     }
+
+    if (imageBounds.y + imageBounds.height < panelBounds.y + panelBounds.height)
+      image.y = -(imageBounds.height - panelBounds.height);
   };
 
   handleDragOver = event => {
@@ -601,7 +617,10 @@ export default class ThreeHorizontal extends React.Component {
 
     let point = new PIXI.Point(clickCanvasX, clickCanvasY);
 
-    return this.semicircle.containsPoint(point) ? 0 : 1;
+    // Use PIXI's containsPoint method to check
+    if (this.panels[0].containsPoint(point)) return 0;
+    if (this.panels[1].containsPoint(point)) return 1;
+    if (this.panels[2].containsPoint(point)) return 2;
   };
 
   render() {
@@ -610,6 +629,30 @@ export default class ThreeHorizontal extends React.Component {
         {/* <AspectSelect handler={this.aspectSelect} /> */}
 
         <p>Double-click panel (or drag and drop) to open image</p>
+
+        {/* <button
+          onClick={() => {
+            this.handlefileDialog(0);
+          }}
+        >
+          Image 1
+        </button>
+
+        <button
+          onClick={() => {
+            this.handlefileDialog(1);
+          }}
+        >
+          Image 2
+        </button>
+
+        <button
+          onClick={() => {
+            this.handlefileDialog(2);
+          }}
+        >
+          Image 3
+        </button> */}
 
         <div
           className={styles.composer}
@@ -652,12 +695,12 @@ export default class ThreeHorizontal extends React.Component {
 
           <input
             className={styles.slider}
-            id="leftZoom"
+            id="image1Zoom"
             type="range"
             min="100"
             max={this.props.maxZoom}
             step="1"
-            value={this.state.leftScale}
+            value={this.state.image1Scale}
             onChange={this.doZoom}
           />
         </div>
@@ -667,12 +710,12 @@ export default class ThreeHorizontal extends React.Component {
 
           <input
             className={styles.slider}
-            id="rightZoom"
+            id="image2Zoom"
             type="range"
             min="100"
             max={this.props.maxZoom}
             step="1"
-            value={this.state.rightScale}
+            value={this.state.image2Scale}
             onChange={this.doZoom}
           />
         </div>
@@ -687,7 +730,7 @@ export default class ThreeHorizontal extends React.Component {
             min="100"
             max={this.props.maxZoom}
             step="1"
-            value={this.state.rightScale}
+            value={this.state.image3Scale}
             onChange={this.doZoom}
           />
         </div>
