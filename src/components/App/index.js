@@ -1,5 +1,7 @@
-const React = require('react');
-const styles = require('./styles.scss');
+import React from 'react';
+import styles from './styles.scss';
+import * as PIXI from 'pixi.js';
+PIXI.utils.skipHello();
 
 // Component imports
 import LayoutSelect from '../LayoutSelect';
