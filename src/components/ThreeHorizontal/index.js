@@ -5,8 +5,6 @@ import fileDialog from 'file-dialog';
 const { detect } = require('detect-browser');
 const browser = detect();
 
-const SLIDER_WIDTH = 5;
-
 import AspectSelect from '../AspectSelect';
 
 import { removeHash, roundNumber } from '../../helpers';
@@ -53,7 +51,6 @@ export default class ThreeHorizontal extends React.Component {
   images = [];
   panels = [];
 
-  slider = new PIXI.Graphics();
 
   componentDidMount() {
     that = this; // To access this in PIXI drag events
@@ -129,8 +126,6 @@ export default class ThreeHorizontal extends React.Component {
     });
   }
 
-  componentDidUpdate() {}
-
   // Called when an image is loaded
   handleImage = image => {
     const src = PIXI.loader.resources[image.src];
@@ -145,10 +140,6 @@ export default class ThreeHorizontal extends React.Component {
   };
 
   process = texture => {
-    // Reset our sliders to zero
-    if (this.state.imageIndex === 0) this.setState({ leftScale: 100 });
-    else if (this.state.imageIndex === 1) this.setState({ rightScale: 100 });
-
     // Load the texture into the sprite
     this.images[this.state.imageIndex].texture = texture;
 
@@ -194,7 +185,7 @@ export default class ThreeHorizontal extends React.Component {
 
       // set the interaction data to null
       this.data = null;
-      
+
       this.cursor = 'pointer';
     }
   }
@@ -379,15 +370,6 @@ export default class ThreeHorizontal extends React.Component {
     });
   };
 
-  setSectionPercent = async percent => {
-    await this.setState({ sectionPercentX: percent });
-
-    this.slider.x =
-      this.state.width * (this.state.sectionPercentX / 100) - SLIDER_WIDTH;
-
-    this.redrawPanels();
-  };
-
   redrawPanels = () => {
     this.images.forEach(image => {
       this.rescaleImage(image);
@@ -397,9 +379,7 @@ export default class ThreeHorizontal extends React.Component {
 
   rescaleImage = image => {
     const { width, height } = image.texture.orig;
-
     const textureRatio = width / height;
-
     const panelWidth = image.mask.width || this.state.width / 3;
 
     const panelRatio = panelWidth / this.state.height;
@@ -414,10 +394,6 @@ export default class ThreeHorizontal extends React.Component {
       image.scale.set(widthRatio, widthRatio);
       image.minScale = widthRatio;
     }
-
-    // Reset sliders
-    this.setState({ leftScale: 100 });
-    this.setState({ rightScale: 100 });
   };
 
   reboundImage = image => {
