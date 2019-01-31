@@ -1,0 +1,57 @@
+.wrapper {
+  margin: 20px;
+  text-align: center;
+}
+
+.composer {
+  margin: 20px auto 20px;
+
+  // Stops chrome selecting text outside div on double-click
+  -webkit-user-select: none; /* Chrome all / Safari all */
+  -moz-user-select: none; /* Firefox all */
+  -ms-user-select: none; /* IE 10+ */
+  user-select: none; /* Likely future */
+
+  canvas {
+    // Remove white space at bottom
+    vertical-align: middle;
+  }
+}
+
+.slider {
+  width: 250px;
+}
+
+.scale {
+  display: inline-block;
+  margin: 0 10px;
+}
+
+a.button {
+  display: inline-block;
+  padding: 0.45em 1.3em 0.28em 1.3em;
+  border: 0.1em solid #222;
+  margin: 0 0.25em 0.5em 0.25em;
+  border-radius: 5px;
+  box-sizing: border-box;
+  text-decoration: none;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 300;
+  color: #222;
+  text-align: center;
+  transition: all 0.05s;
+}
+a.button:hover {
+  color: white;
+  background-color: #222;
+}
+@media all and (max-width: 30em) {
+  a.button {
+    display: block;
+    margin: 0.4em auto;
+  }
+}
+
+p.label {
+  margin-bottom: 0.4em;
+}
