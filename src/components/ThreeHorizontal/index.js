@@ -184,7 +184,6 @@ export default class ThreeHorizontal extends React.Component {
       this.dragPoint = event.data.getLocalPosition(this.parent);
       this.dragPoint.x -= this.x;
       this.dragPoint.y -= this.y;
-      this.cursor = 'move';
     }
   }
 
@@ -208,6 +207,7 @@ export default class ThreeHorizontal extends React.Component {
       this.y = newPosition.y - this.dragPoint.y;
 
       that.reboundImage(this);
+      this.cursor = 'move';
     }
   }
 
