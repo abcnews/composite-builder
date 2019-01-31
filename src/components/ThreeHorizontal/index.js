@@ -229,7 +229,7 @@ export default class ThreeHorizontal extends React.Component {
   // Pass a sprite to this to enable dragging
   draggify = object => {
     object.interactive = true;
-    object.buttonMode = true;
+    object.cursor = 'pointer';
     object
       .on('mousedown', this.onDragStart)
       .on('touchstart', this.onDragStart)
@@ -250,6 +250,7 @@ export default class ThreeHorizontal extends React.Component {
       this.dragPoint = event.data.getLocalPosition(this.parent);
       this.dragPoint.x -= this.x;
       this.dragPoint.y -= this.y;
+      this.cursor = 'move';
     }
   }
 
@@ -260,6 +261,7 @@ export default class ThreeHorizontal extends React.Component {
 
       // set the interaction data to null
       this.data = null;
+      this.cursor = 'pointer';
     }
   }
 
@@ -481,6 +483,19 @@ export default class ThreeHorizontal extends React.Component {
     this.app.renderer.resize(this.state.width, this.state.height);
     this.composer.style.width = this.state.width + 'px'; // Wrap container tightly
 
+    this.panels[1].x = Math.floor(this.state.width * this.state.section1);
+    this.panels[2].x = Math.floor(this.state.width * this.state.section2);
+
+    this.panels.forEach(panel => {
+      panel.width = Math.round(this.state.width / 3);
+      panel.height = this.state.height;
+    });
+
+    this.images.forEach(image => {
+      this.rescaleImage(image);
+      this.reboundImage(image);
+    });
+
     // Reset bottom image base
     // this.images[1].baseX =
     //   this.state.width * (this.state.sectionPercentX / 100);
@@ -501,11 +516,6 @@ export default class ThreeHorizontal extends React.Component {
     // this.semicircle.x = this.state.width * (this.state.sectionPercentX / 100);
     // this.semicircle.width = Math.hypot(this.state.width, this.state.height);
     // this.semicircle.height = Math.hypot(this.state.width, this.state.height);
-
-    this.images.forEach(image => {
-      this.rescaleImage(image);
-      this.reboundImage(image);
-    });
 
     // Realign the slider
     // this.slider.height = this.state.height;
@@ -626,7 +636,7 @@ export default class ThreeHorizontal extends React.Component {
   render() {
     return (
       <div className={styles.wrapper}>
-        {/* <AspectSelect handler={this.aspectSelect} /> */}
+        <AspectSelect handler={this.aspectSelect} />
 
         <p>Double-click panel (or drag and drop) to open image</p>
 
