@@ -130,16 +130,6 @@ export default class TwoHorizontal extends React.Component {
   };
 
   process = texture => {
-    // Reset our sliders to zero
-    // if (this.state.imageIndex === 0) this.setState({ leftScale: 100 });
-    // else this.setState({ rightScale: 100 });
-
-    // Reposition image up top
-    // this.images[this.state.imageIndex].x = this.images[
-    //   this.state.imageIndex
-    // ].baseX;
-    // this.images[this.state.imageIndex].y = 0;
-
     // Load the texture into the sprite
     this.images[this.state.imageIndex].texture = texture;
 
@@ -147,13 +137,10 @@ export default class TwoHorizontal extends React.Component {
     this.reZoom(this.images[this.state.imageIndex]);
     this.reboundImage(this.images[this.state.imageIndex]);
 
-    // Start the animation loop
-    this.app.ticker.add(delta => this.animationLoop(delta));
+    
   };
 
-  // Use this if we require PIXI animations
-  animationLoop = delta => {};
-
+ 
   // Pass a sprite to this to enable dragging
   draggify = object => {
     object.interactive = true;
@@ -188,6 +175,8 @@ export default class TwoHorizontal extends React.Component {
 
       // set the interaction data to null
       this.data = null;
+
+      this.cursor = 'pointer';
     }
   }
 
@@ -198,6 +187,8 @@ export default class TwoHorizontal extends React.Component {
       this.y = newPosition.y - this.dragPoint.y;
 
       that.reboundImage(this);
+
+      this.cursor = 'move';
     }
   }
 

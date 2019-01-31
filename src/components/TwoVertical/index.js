@@ -181,6 +181,8 @@ export default class TwoVertical extends React.Component {
 
       // set the interaction data to null
       this.data = null;
+
+      this.cursor = 'pointer';
     }
   }
 
@@ -191,6 +193,8 @@ export default class TwoVertical extends React.Component {
       this.y = newPosition.y - this.dragPoint.y;
 
       that.reboundImage(this);
+
+      this.cursor = 'move';
     }
   }
 

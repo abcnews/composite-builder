@@ -101,39 +101,13 @@ export default class TwoDiagonal extends React.Component {
   };
 
   process = texture => {
-    const { width, height } = texture;
-    const textureRatio = width / height;
-    const builderRatio = this.state.width / this.state.height;
-
-    const heightRatio = this.state.height / height;
-    const widthRatio = this.state.width / width;
-
-    // Scale image so it fits on stage
-    if (textureRatio > builderRatio) {
-      this.images[this.state.imageIndex].scale.set(heightRatio, heightRatio);
-      this.images[this.state.imageIndex].minScale = heightRatio;
-    } else {
-      this.images[this.state.imageIndex].scale.set(widthRatio, widthRatio);
-      this.images[this.state.imageIndex].minScale = widthRatio;
-    }
-
-    // Reset our sliders to zero
-    if (this.state.imageIndex === 0) this.setState({ topScale: 100 });
-    else this.setState({ bottomScale: 100 });
-
-    // Reposition image up top
-    this.images[this.state.imageIndex].x = 0;
-    this.images[this.state.imageIndex].y = 0;
-
     // Load the texture into the sprite
     this.images[this.state.imageIndex].texture = texture;
 
-    // Start the animation loop
-    this.app.ticker.add(delta => this.animationLoop(delta));
+    this.rescaleImage(this.images[this.state.imageIndex]);
+    this.reZoom(this.images[this.state.imageIndex]);
+    this.reboundImage(this.images[this.state.imageIndex]);
   };
-
-  // Use this if we require PIXI animations
-  animationLoop = delta => {};
 
   // Pass a sprite to this to enable dragging
   draggify = obj => {
@@ -196,15 +170,16 @@ export default class TwoDiagonal extends React.Component {
     img.scale.x = img.minScale * scale; //+ (scale / 100 - 0.01);
     img.scale.y = img.minScale * scale; //+ (scale / 100 - 0.01);
 
-    let imageBounds = img.getBounds();
+    // Used to reZoom
+    img.lastKnownZoom = event.target.value;
 
-    // Keep image within stage bounds
-    if (img.x > 0) img.x = 0;
-    if (img.y > 0) img.y = 0;
-    if (img.x + imageBounds.width < this.state.width)
-      img.x = -(imageBounds.width - this.state.width);
-    if (img.y + imageBounds.height < this.state.height)
-      img.y = -(imageBounds.height - this.state.height);
+    this.reboundImage(img);
+  };
+
+  reZoom = image => {
+    let scale = image.lastKnownZoom / 100 || 1;
+    image.scale.x = image.minScale * scale;
+    image.scale.y = image.minScale * scale;
   };
 
   handleSave = type => event => {
@@ -350,12 +325,9 @@ export default class TwoDiagonal extends React.Component {
 
     this.images.forEach(image => {
       this.rescaleImage(image);
+      this.reZoom(image);
       this.reboundImage(image);
     });
-
-    // Reset sliders
-    this.setState({ topScale: 100 });
-    this.setState({ bottomScale: 100 });
   };
 
   rescaleImage = image => {
