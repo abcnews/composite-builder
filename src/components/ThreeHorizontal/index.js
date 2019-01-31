@@ -53,8 +53,6 @@ export default class ThreeHorizontal extends React.Component {
   images = [];
   panels = [];
 
-  // semicircle = new PIXI.Graphics();
-  // maskPlaceholder = new PIXI.Graphics();
   slider = new PIXI.Graphics();
 
   componentDidMount() {
@@ -129,58 +127,6 @@ export default class ThreeHorizontal extends React.Component {
     this.images.forEach((image, i) => {
       image.mask = this.panels[i];
     });
-
-    // Use a placeholder for image 0
-    // this.maskPlaceholder.beginFill(0xcccccc);
-    // this.maskPlaceholder.lineStyle(0, 0xffd900, 1);
-    // this.maskPlaceholder.arc(
-    //   0,
-    //   0,
-    //   Math.hypot(this.state.width, this.state.height),
-    //   0,
-    //   Math.PI
-    // ); // cx, cy, radius, startAngle, endAngle
-    // this.maskPlaceholder.x =
-    //   this.state.width * (this.state.sectionPercentX / 100);
-    // this.maskPlaceholder.y = this.state.height / 2;
-    // this.maskPlaceholder.rotation = Math.PI / 2;
-
-    // Add the placeholder
-    // this.app.stage.addChild(this.maskPlaceholder);
-
-    // this.images[0].baseX = 0;
-    // this.images[1].baseX =
-    //   this.state.width * (this.state.sectionPercentX / 100);
-
-    // // Let's try a semi circle
-    // this.semicircle.beginFill(0xff0000);
-    // this.semicircle.lineStyle(4, 0xffd900, 1);
-    // this.semicircle.arc(
-    //   0,
-    //   0,
-    //   Math.hypot(this.state.width, this.state.height),
-    //   0,
-    //   Math.PI
-    // ); // cx, cy, radius, startAngle, endAngle
-    // this.semicircle.x = this.state.width * (this.state.sectionPercentX / 100);
-    // this.semicircle.y = this.state.height / 2;
-    // this.semicircle.rotation = Math.PI / 2; // Vertical
-
-    // // Add to stage and then mask first image
-    // this.app.stage.addChild(this.semicircle);
-    // this.images[0].mask = this.semicircle;
-
-    // Create a slider to control the section
-    // set a fill and a line style again and draw a rectangle
-    // this.slider.lineStyle(0, 0x0000ff, 1);
-    // this.slider.beginFill(0xff700b, 0.0);
-    // this.slider.drawRect(0, 0, SLIDER_WIDTH * 2, this.state.height);
-    // this.slider.x = this.state.width / 2 - SLIDER_WIDTH;
-    // this.slider.y = 0;
-
-    // this.app.stage.addChild(this.slider);
-
-    // this.sliderInit(this.slider);
   }
 
   componentDidUpdate() {}
@@ -203,12 +149,6 @@ export default class ThreeHorizontal extends React.Component {
     if (this.state.imageIndex === 0) this.setState({ leftScale: 100 });
     else if (this.state.imageIndex === 1) this.setState({ rightScale: 100 });
 
-    // Reposition image up top
-    // this.images[this.state.imageIndex].x = this.images[
-    //   this.state.imageIndex
-    // ].baseX;
-    // this.images[this.state.imageIndex].y = 0;
-
     // Load the texture into the sprite
     this.images[this.state.imageIndex].texture = texture;
 
@@ -218,13 +158,7 @@ export default class ThreeHorizontal extends React.Component {
 
     // Remove initial tint
     this.images[this.state.imageIndex].tint = 0xffffff;
-
-    // Start the animation loop
-    // this.app.ticker.add(delta => this.animationLoop(delta));
   };
-
-  // Use this if we require PIXI animations
-  // animationLoop = delta => {};
 
   // Pass a sprite to this to enable dragging
   draggify = object => {
@@ -276,61 +210,6 @@ export default class ThreeHorizontal extends React.Component {
       that.reboundImage(this);
     }
   }
-
-  sliderInit = object => {
-    object.interactive = true;
-    object.cursor = 'ew-resize';
-
-    object
-      .on('mousedown', this.onSliderDragStart)
-      .on('touchstart', this.onSliderDragStart)
-      .on('mouseup', this.onSliderDragEnd)
-      .on('mouseupoutside', this.onSliderDragEnd)
-      .on('touchend', this.onSliderDragEnd)
-      .on('touchendoutside', this.onSliderDragEnd)
-      .on('mousemove', this.onSliderDragMove)
-      .on('touchmove', this.onSliderDragMove);
-  };
-
-  onSliderDragStart(event) {
-    if (!this.dragging) {
-      this.data = event.data;
-      this.oldGroup = this.parentGroup;
-      this.dragging = true;
-
-      this.dragPoint = event.data.getLocalPosition(this.parent);
-      this.dragPoint.x -= this.x;
-      this.dragPoint.y -= this.y;
-    }
-  }
-
-  onSliderDragEnd() {
-    if (this.dragging) {
-      this.dragging = false;
-      this.parentGroup = this.oldGroup;
-
-      // set the interaction data to null
-      this.data = null;
-    }
-  }
-
-  onSliderDragMove = async function() {
-    if (this.dragging) {
-      var newPosition = this.data.getLocalPosition(this.parent);
-      this.x = newPosition.x - this.dragPoint.x;
-      // this.y = newPosition.y - this.dragPoint.y;
-
-      // Keep within sensible bounds
-      if (this.x < 0 - SLIDER_WIDTH) this.x = 0 - SLIDER_WIDTH;
-      if (this.x > that.state.width - SLIDER_WIDTH)
-        this.x = that.state.width - SLIDER_WIDTH;
-
-      let newPercentageX = ((this.x + SLIDER_WIDTH) / that.state.width) * 100;
-      that.setState({ sectionPercentX: newPercentageX });
-
-      that.redrawPanels();
-    }
-  };
 
   doZoom = event => {
     let scale = event.target.value / 100;
@@ -493,34 +372,9 @@ export default class ThreeHorizontal extends React.Component {
 
     this.images.forEach(image => {
       this.rescaleImage(image);
+      this.reZoom(image);
       this.reboundImage(image);
     });
-
-    // Reset bottom image base
-    // this.images[1].baseX =
-    //   this.state.width * (this.state.sectionPercentX / 100);
-
-    // this.maskPlaceholder.y = this.state.height / 2;
-    // this.maskPlaceholder.x =
-    //   this.state.width * (this.state.sectionPercentX / 100);
-    // this.maskPlaceholder.width = Math.hypot(
-    //   this.state.width,
-    //   this.state.height
-    // );
-    // this.maskPlaceholder.height = Math.hypot(
-    //   this.state.width,
-    //   this.state.height
-    // );
-
-    // this.semicircle.y = this.state.height / 2;
-    // this.semicircle.x = this.state.width * (this.state.sectionPercentX / 100);
-    // this.semicircle.width = Math.hypot(this.state.width, this.state.height);
-    // this.semicircle.height = Math.hypot(this.state.width, this.state.height);
-
-    // Realign the slider
-    // this.slider.height = this.state.height;
-    // this.slider.x =
-    //   this.state.width * (this.state.sectionPercentX / 100) - SLIDER_WIDTH;
   };
 
   setSectionPercent = async percent => {
@@ -533,14 +387,6 @@ export default class ThreeHorizontal extends React.Component {
   };
 
   redrawPanels = () => {
-    // this.images[1].baseX =
-    //   this.state.width * (this.state.sectionPercentX / 100);
-
-    // this.maskPlaceholder.x =
-    //   this.state.width * (this.state.sectionPercentX / 100);
-
-    // this.semicircle.x = this.state.width * (this.state.sectionPercentX / 100);
-
     this.images.forEach(image => {
       this.rescaleImage(image);
       this.reboundImage(image);
@@ -550,18 +396,7 @@ export default class ThreeHorizontal extends React.Component {
   rescaleImage = image => {
     const { width, height } = image.texture.orig;
 
-    // Dont process if no image loaded
-    // if (width < 2 && height < 2) return;
-    // if (image.tint !== 0xFFFFFF) return;
-
     const textureRatio = width / height;
-
-    // const leftPanelWidth =
-    //   this.state.width * (this.state.sectionPercentX / 100);
-    // const rightPanelWidth =
-    //   this.state.width * (1 - this.state.sectionPercentX / 100);
-
-    // const panelWidth = image.name === 'left' ? leftPanelWidth : rightPanelWidth;
 
     const panelWidth = image.mask.width || this.state.width / 3;
 
@@ -640,30 +475,6 @@ export default class ThreeHorizontal extends React.Component {
 
         <p>Double-click panel (or drag and drop) to open image</p>
 
-        {/* <button
-          onClick={() => {
-            this.handlefileDialog(0);
-          }}
-        >
-          Image 1
-        </button>
-
-        <button
-          onClick={() => {
-            this.handlefileDialog(1);
-          }}
-        >
-          Image 2
-        </button>
-
-        <button
-          onClick={() => {
-            this.handlefileDialog(2);
-          }}
-        >
-          Image 3
-        </button> */}
-
         <div
           className={styles.composer}
           ref={el => (this.composer = el)}
@@ -671,34 +482,6 @@ export default class ThreeHorizontal extends React.Component {
           onDrop={this.handleDrop}
           onDragOver={this.handleDragOver}
         />
-
-        {/* <div>
-          <p className={styles.label}>
-            Section position {roundNumber(this.state.sectionPercentX, 0)}%
-          </p>
-
-          <button
-            onClick={() => {
-              this.setSectionPercent(100 / 3);
-            }}
-          >
-            33.3%
-          </button>
-          <button
-            onClick={() => {
-              this.setSectionPercent(50);
-            }}
-          >
-            50%
-          </button>
-          <button
-            onClick={() => {
-              this.setSectionPercent(100 - 100 / 3);
-            }}
-          >
-            66.6%
-          </button>
-        </div> */}
 
         <div className={styles.scale}>
           <p className={styles.label}>Image 1 scale</p>
