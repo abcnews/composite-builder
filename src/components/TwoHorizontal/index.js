@@ -130,28 +130,17 @@ export default class TwoHorizontal extends React.Component {
   };
 
   process = texture => {
-    // Reset our sliders to zero
-    if (this.state.imageIndex === 0) this.setState({ leftScale: 100 });
-    else this.setState({ rightScale: 100 });
-
-    // Reposition image up top
-    this.images[this.state.imageIndex].x = this.images[
-      this.state.imageIndex
-    ].baseX;
-    this.images[this.state.imageIndex].y = 0;
-
     // Load the texture into the sprite
     this.images[this.state.imageIndex].texture = texture;
 
     this.rescaleImage(this.images[this.state.imageIndex]);
+    this.reZoom(this.images[this.state.imageIndex]);
+    this.reboundImage(this.images[this.state.imageIndex]);
 
-    // Start the animation loop
-    this.app.ticker.add(delta => this.animationLoop(delta));
+    
   };
 
-  // Use this if we require PIXI animations
-  animationLoop = delta => {};
-
+ 
   // Pass a sprite to this to enable dragging
   draggify = object => {
     object.interactive = true;
@@ -186,6 +175,8 @@ export default class TwoHorizontal extends React.Component {
 
       // set the interaction data to null
       this.data = null;
+
+      this.cursor = 'pointer';
     }
   }
 
@@ -196,6 +187,8 @@ export default class TwoHorizontal extends React.Component {
       this.y = newPosition.y - this.dragPoint.y;
 
       that.reboundImage(this);
+
+      this.cursor = 'move';
     }
   }
 
@@ -263,12 +256,19 @@ export default class TwoHorizontal extends React.Component {
       this.setState({ leftScale: event.target.value });
     else this.setState({ rightScale: event.target.value });
 
+    // Used to reZoom
+    img.lastKnownZoom = event.target.value;
+
     img.scale.x = img.minScale * scale; //+ (scale / 100 - 0.01);
     img.scale.y = img.minScale * scale; //+ (scale / 100 - 0.01);
 
-    let imageBounds = img.getBounds();
-
     this.reboundImage(img);
+  };
+
+  reZoom = image => {
+    let scale = image.lastKnownZoom / 100 || 1;
+    image.scale.x = image.minScale * scale;
+    image.scale.y = image.minScale * scale;
   };
 
   handleSave = type => event => {
@@ -411,6 +411,7 @@ export default class TwoHorizontal extends React.Component {
 
     this.images.forEach(image => {
       this.rescaleImage(image);
+      this.reZoom(image);
       this.reboundImage(image);
     });
 
@@ -440,6 +441,7 @@ export default class TwoHorizontal extends React.Component {
 
     this.images.forEach(image => {
       this.rescaleImage(image);
+      this.reZoom(image);
       this.reboundImage(image);
     });
   };
@@ -473,10 +475,6 @@ export default class TwoHorizontal extends React.Component {
       image.scale.set(widthRatio, widthRatio);
       image.minScale = widthRatio;
     }
-
-    // Reset sliders
-    this.setState({ leftScale: 100 });
-    this.setState({ rightScale: 100 });
   };
 
   reboundImage = image => {

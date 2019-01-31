@@ -79,9 +79,12 @@ export default class TwoVertical extends React.Component {
     this.images[0].name = 'top';
     this.images[1].name = 'bottom';
 
+    // TODO: Remove image base feature as unneeded now we rebound everywhere
     this.images[0].baseY = 0;
     this.images[1].baseY =
       this.state.height * (this.state.sectionPercentY / 100);
+
+    // this.images[1].y = this.images[1].baseY;
 
     // Let's try a semi circle
     this.semicircle.beginFill(0xff0000);
@@ -130,20 +133,12 @@ export default class TwoVertical extends React.Component {
   };
 
   process = texture => {
-    // Reset our sliders to zero
-    if (this.state.imageIndex === 0) this.setState({ topScale: 100 });
-    else this.setState({ bottomScale: 100 });
-
-    // Reposition image up top
-    this.images[this.state.imageIndex].x = 0;
-    this.images[this.state.imageIndex].y = this.images[
-      this.state.imageIndex
-    ].baseY;
-
     // Load the texture into the sprite
     this.images[this.state.imageIndex].texture = texture;
 
     this.rescaleImage(this.images[this.state.imageIndex]);
+    this.reZoom(this.images[this.state.imageIndex]);
+    this.reboundImage(this.images[this.state.imageIndex]);
 
     // Start the animation loop
     this.app.ticker.add(delta => this.animationLoop(delta));
@@ -186,6 +181,8 @@ export default class TwoVertical extends React.Component {
 
       // set the interaction data to null
       this.data = null;
+
+      this.cursor = 'pointer';
     }
   }
 
@@ -196,6 +193,8 @@ export default class TwoVertical extends React.Component {
       this.y = newPosition.y - this.dragPoint.y;
 
       that.reboundImage(this);
+
+      this.cursor = 'move';
     }
   }
 
@@ -266,34 +265,16 @@ export default class TwoVertical extends React.Component {
     img.scale.x = img.minScale * scale; //+ (scale / 100 - 0.01);
     img.scale.y = img.minScale * scale; //+ (scale / 100 - 0.01);
 
-    let imageBounds = img.getBounds();
+    // Used to reZoom
+    img.lastKnownZoom = event.target.value;
 
-    // Top and bottom images have different bounding boxes
-    if (img.name === 'top') {
-      // Keep image within stage bounds
-      if (img.x > 0) img.x = 0;
-      if (img.y > 0) img.y = 0;
+    this.reboundImage(img);
+  };
 
-      if (img.x + imageBounds.width < this.state.width)
-        img.x = -(imageBounds.width - this.state.width);
-      if (
-        img.y + imageBounds.height <
-        this.state.height * (this.state.sectionPercentY / 100)
-      )
-        img.y = -(
-          imageBounds.height -
-          this.state.height * (this.state.sectionPercentY / 100)
-        );
-    } else {
-      if (img.x > 0) img.x = 0;
-      if (img.y > 0 + this.state.height * (this.state.sectionPercentY / 100))
-        img.y = 0 + this.state.height * (this.state.sectionPercentY / 100);
-
-      if (img.x + imageBounds.width < this.state.width)
-        img.x = -(imageBounds.width - this.state.width);
-      if (img.y + imageBounds.height < this.state.height)
-        img.y = -(imageBounds.height - this.state.height);
-    }
+  reZoom = image => {
+    let scale = image.lastKnownZoom / 100 || 1;
+    image.scale.x = image.minScale * scale;
+    image.scale.y = image.minScale * scale;
   };
 
   handleSave = type => event => {
@@ -436,6 +417,7 @@ export default class TwoVertical extends React.Component {
 
     this.images.forEach(image => {
       this.rescaleImage(image);
+      this.reZoom(image);
       this.reboundImage(image);
     });
 
@@ -465,6 +447,7 @@ export default class TwoVertical extends React.Component {
 
     this.images.forEach(image => {
       this.rescaleImage(image);
+      this.reZoom(image);
       this.reboundImage(image);
     });
   };
@@ -502,8 +485,8 @@ export default class TwoVertical extends React.Component {
     }
 
     // Reset sliders
-    this.setState({ topScale: 100 });
-    this.setState({ bottomScale: 100 });
+    // this.setState({ topScale: 100 });
+    // this.setState({ bottomScale: 100 });
   };
 
   reboundImage = image => {
