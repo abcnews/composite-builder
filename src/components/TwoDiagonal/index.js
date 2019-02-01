@@ -21,7 +21,7 @@ export default class TwoDiagonal extends React.Component {
   };
 
   app = new PIXI.Application({
-    backgroundColor: 0xeeeeee,
+    backgroundColor: 0xcccccc,
     preserveDrawingBuffer: true,
     antialias: true
   });
@@ -47,7 +47,7 @@ export default class TwoDiagonal extends React.Component {
     this.app.stage.addChild(this.images[1]);
 
     // Use a placeholder for image 0
-    this.maskPlaceholder.beginFill(0xcccccc);
+    this.maskPlaceholder.beginFill(0xdddddd);
     this.maskPlaceholder.lineStyle(0, 0xffd900, 1);
     this.maskPlaceholder.arc(0, 0, this.state.width, 0, Math.PI); // cx, cy, radius, startAngle, endAngle
     this.maskPlaceholder.x = this.state.width / 2;

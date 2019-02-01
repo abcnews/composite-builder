@@ -24,7 +24,7 @@ export default class TwoHorizontal extends React.Component {
   };
 
   app = new PIXI.Application({
-    backgroundColor: 0xeeeeee,
+    backgroundColor: 0xcccccc,
     preserveDrawingBuffer: true,
     antialias: true
   });
@@ -51,7 +51,7 @@ export default class TwoHorizontal extends React.Component {
     this.app.stage.addChild(this.images[1]);
 
     // Use a placeholder for image 0
-    this.maskPlaceholder.beginFill(0xcccccc);
+    this.maskPlaceholder.beginFill(0xdddddd);
     this.maskPlaceholder.lineStyle(0, 0xffd900, 1);
     this.maskPlaceholder.arc(
       0,

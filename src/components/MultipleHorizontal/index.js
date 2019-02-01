@@ -108,26 +108,26 @@ export default class MultipleHorizontal extends React.Component {
     this.images[0].y = this.state.panel1[1];
     this.images[0].width = this.state.panel1[2] - this.state.panel1[0];
     this.images[0].height = this.state.panel1[3] - this.state.panel1[1];
-    this.images[0].tint = Math.random() * 0xffffff; // 0xdcdcdc;
+    this.images[0].tint = 0xdddddd;
 
     this.images[1].x = this.state.panel2[0];
     this.images[1].y = this.state.panel2[1];
     this.images[1].width = this.state.panel2[2] - this.state.panel2[0];
     this.images[1].height = this.state.panel2[3] - this.state.panel2[1];
-    this.images[1].tint = Math.random() * 0xffffff; //  0xc0c0c0;
+    this.images[1].tint = 0xcccccc; //  0xc0c0c0;
 
     this.images[2].x = this.state.panel3[0];
     this.images[2].y = this.state.panel3[1];
     this.images[2].width = this.state.panel3[2] - this.state.panel3[0];
     this.images[2].height = this.state.panel3[3] - this.state.panel3[1];
-    this.images[2].tint = Math.random() * 0xffffff; // 0xa9a9a9;
+    this.images[2].tint = 0xbbbbbb; // 0xa9a9a9;
 
     if (this.props.panelCount > 3) {
       this.images[3].x = this.state.panel4[0];
       this.images[3].y = this.state.panel4[1];
       this.images[3].width = this.state.panel4[2] - this.state.panel4[0];
       this.images[3].height = this.state.panel4[3] - this.state.panel4[1];
-      this.images[3].tint = Math.random() * 0xffffff; // 0x999999;
+      this.images[3].tint = 0xaaaaaa; // 0x999999;
     }
 
     // Add panels for masking
