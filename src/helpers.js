@@ -30,6 +30,12 @@ export function roundNumber(num, scale) {
   }
 }
 
+export function getRandomInt(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 // Polyfills
 if (!Math.hypot) Math.hypot = function (x, y) {
   // https://bugzilla.mozilla.org/show_bug.cgi?id=896264#c28

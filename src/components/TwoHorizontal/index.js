@@ -4,12 +4,13 @@ import * as PIXI from 'pixi.js';
 import fileDialog from 'file-dialog';
 const { detect } = require('detect-browser');
 const browser = detect();
+import {AsciiFilter} from '@pixi/filter-ascii';
 
 const SLIDER_WIDTH = 5;
 
 import AspectSelect from '../AspectSelect';
 
-import { removeHash, roundNumber } from '../../helpers';
+import { removeHash, roundNumber, getRandomInt } from '../../helpers';
 
 let that; // Later used to access class in drag events
 
@@ -24,7 +25,7 @@ export default class TwoHorizontal extends React.Component {
   };
 
   app = new PIXI.Application({
-    backgroundColor: 0xcccccc,
+    backgroundColor: 0x000000,
     preserveDrawingBuffer: true,
     antialias: true
   });
@@ -51,7 +52,7 @@ export default class TwoHorizontal extends React.Component {
     this.app.stage.addChild(this.images[1]);
 
     // Use a placeholder for image 0
-    this.maskPlaceholder.beginFill(0xdddddd);
+    this.maskPlaceholder.beginFill(0x111111);
     this.maskPlaceholder.lineStyle(0, 0xffd900, 1);
     this.maskPlaceholder.arc(
       0,
@@ -136,11 +137,8 @@ export default class TwoHorizontal extends React.Component {
     this.rescaleImage(this.images[this.state.imageIndex]);
     this.reZoom(this.images[this.state.imageIndex]);
     this.reboundImage(this.images[this.state.imageIndex]);
-
-    
   };
 
- 
   // Pass a sprite to this to enable dragging
   draggify = object => {
     object.interactive = true;
@@ -542,6 +540,30 @@ export default class TwoHorizontal extends React.Component {
     return this.semicircle.containsPoint(point) ? 0 : 1;
   };
 
+  applyFilter = async () => {
+    let colorMatrix = new PIXI.filters.ColorMatrixFilter();
+
+    this.images.forEach(image => {
+      image.filters = [new AsciiFilter()];
+    });
+
+    let numberOfFilters = 4;
+
+    await this.setState(prevState => {
+      if (prevState.filterIndex < numberOfFilters) {
+        return { filterIndex: prevState.filterIndex + 1 };
+      } else
+        return {
+          filterIndex: 1
+        };
+    });
+
+    if (this.state.filterIndex === 1) colorMatrix.contrast(2);
+    if (this.state.filterIndex === 2) colorMatrix.greyscale(0.5, true);
+    if (this.state.filterIndex === 3) colorMatrix.browni(true);
+    if (this.state.filterIndex === 4) colorMatrix.lsd(true);
+  };
+
   render() {
     return (
       <div className={styles.wrapper}>
@@ -646,10 +668,14 @@ export default class TwoHorizontal extends React.Component {
             Return to layout selection
           </a>
         </p>
+
         <p>
           <small>
             <a href="#two-image">(Looking for the old builder?)</a>
           </small>
+        </p>
+        <p>
+          <button onClick={this.applyFilter}>Cool filter!</button>
         </p>
       </div>
     );
