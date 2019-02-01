@@ -11,6 +11,10 @@ import { removeHash, roundNumber } from '../../helpers';
 
 let that; // Later used to access class in drag events
 
+/**
+ * Currently supports @props panelCount={3} (or 4)
+ * TODO: extend support for 2
+ */
 export default class MultipleHorizontal extends React.Component {
   state = {
     width: this.props.builderWidth,
@@ -104,26 +108,26 @@ export default class MultipleHorizontal extends React.Component {
     this.images[0].y = this.state.panel1[1];
     this.images[0].width = this.state.panel1[2] - this.state.panel1[0];
     this.images[0].height = this.state.panel1[3] - this.state.panel1[1];
-    this.images[0].tint = Math.random() * 0xFFFFFF // 0xdcdcdc;
+    this.images[0].tint = Math.random() * 0xffffff; // 0xdcdcdc;
 
     this.images[1].x = this.state.panel2[0];
     this.images[1].y = this.state.panel2[1];
     this.images[1].width = this.state.panel2[2] - this.state.panel2[0];
     this.images[1].height = this.state.panel2[3] - this.state.panel2[1];
-    this.images[1].tint = Math.random() * 0xFFFFFF //  0xc0c0c0;
+    this.images[1].tint = Math.random() * 0xffffff; //  0xc0c0c0;
 
     this.images[2].x = this.state.panel3[0];
     this.images[2].y = this.state.panel3[1];
     this.images[2].width = this.state.panel3[2] - this.state.panel3[0];
     this.images[2].height = this.state.panel3[3] - this.state.panel3[1];
-    this.images[2].tint =  Math.random() * 0xFFFFFF // 0xa9a9a9;
+    this.images[2].tint = Math.random() * 0xffffff; // 0xa9a9a9;
 
     if (this.props.panelCount > 3) {
       this.images[3].x = this.state.panel4[0];
       this.images[3].y = this.state.panel4[1];
       this.images[3].width = this.state.panel4[2] - this.state.panel4[0];
       this.images[3].height = this.state.panel4[3] - this.state.panel4[1];
-      this.images[3].tint =  Math.random() * 0xFFFFFF // 0x999999;
+      this.images[3].tint = Math.random() * 0xffffff; // 0x999999;
     }
 
     // Add panels for masking
@@ -252,6 +256,9 @@ export default class MultipleHorizontal extends React.Component {
     } else if (event.target.id === 'image3Zoom') {
       img = this.images[2];
       this.setState({ image3Scale: event.target.value });
+    } else if (event.target.id === 'image4Zoom') {
+      img = this.images[3];
+      this.setState({ image4Scale: event.target.value });
     }
 
     // Used to reZoom
@@ -391,9 +398,11 @@ export default class MultipleHorizontal extends React.Component {
 
     this.panels[1].x = Math.floor(this.state.width * this.state.section1);
     this.panels[2].x = Math.floor(this.state.width * this.state.section2);
+    if (this.props.panelCount > 3)
+      this.panels[3].x = Math.floor(this.state.width * this.state.section3);
 
     this.panels.forEach(panel => {
-      panel.width = Math.round(this.state.width / 3);
+      panel.width = Math.round(this.state.width / this.props.panelCount);
       panel.height = this.state.height;
     });
 
@@ -540,6 +549,23 @@ export default class MultipleHorizontal extends React.Component {
             onChange={this.doZoom}
           />
         </div>
+
+        {this.props.panelCount > 3 && (
+          <div className={styles.scale}>
+            <p className={styles.label}>Image 4 scale</p>
+
+            <input
+              className={styles.slider}
+              id="image4Zoom"
+              type="range"
+              min="100"
+              max={this.props.maxZoom}
+              step="1"
+              value={this.state.image4Scale}
+              onChange={this.doZoom}
+            />
+          </div>
+        )}
 
         <p>
           <a
