@@ -11,7 +11,7 @@ import { removeHash, roundNumber } from '../../helpers';
 
 let that; // Later used to access class in drag events
 
-export default class ThreeHorizontal extends React.Component {
+export default class MultipleHorizontal extends React.Component {
   state = {
     width: this.props.builderWidth,
     height: this.props.builderHeight,
@@ -19,25 +19,39 @@ export default class ThreeHorizontal extends React.Component {
     image1Scale: 100,
     image2Scale: 100,
     image3Scale: 100,
+    image4Scale: 100,
     sectionPercentX: 50,
-    section1: 1 / 3,
-    section2: 2 / 3,
+    section1: (function(panelCount) {
+      return 1 / panelCount;
+    })(this.props.panelCount),
+    section2: (function(panelCount) {
+      return 2 / panelCount;
+    })(this.props.panelCount),
+    section3: (function(panelCount) {
+      return 3 / panelCount;
+    })(this.props.panelCount),
     panel1: [
       0,
       0,
-      Math.round(this.props.builderWidth / 3),
+      Math.round(this.props.builderWidth / this.props.panelCount),
       this.props.builderHeight
     ],
     panel2: [
-      Math.round(this.props.builderWidth / 3),
+      Math.round(this.props.builderWidth / this.props.panelCount),
       0,
-      Math.round(this.props.builderWidth * (2 / 3)),
+      Math.round(this.props.builderWidth * (2 / this.props.panelCount)),
       this.props.builderHeight
     ],
     panel3: [
-      Math.round(this.props.builderWidth * (2 / 3)),
+      Math.round(this.props.builderWidth * (2 / this.props.panelCount)),
       0,
-      this.props.builderWidth,
+      Math.round(this.props.builderWidth * (3 / this.props.panelCount)),
+      this.props.builderHeight
+    ],
+    panel4: [
+      Math.round(this.props.builderWidth * (3 / this.props.panelCount)),
+      0,
+      Math.round(this.props.builderWidth * (4 / this.props.panelCount)),
       this.props.builderHeight
     ]
   };
@@ -51,12 +65,11 @@ export default class ThreeHorizontal extends React.Component {
   images = [];
   panels = [];
 
-
   componentDidMount() {
     that = this; // To access this in PIXI drag events
 
     // Set up the sprite images
-    const numberOfImages = 3;
+    const numberOfImages = this.props.panelCount;
     for (let i = 0; i < numberOfImages; i++) {
       this.images[i] = new PIXI.Sprite(PIXI.Texture.WHITE);
       this.panels[i] = new PIXI.Graphics();
@@ -68,14 +81,18 @@ export default class ThreeHorizontal extends React.Component {
     this.composer.style.width = this.state.width + 'px'; // Wrap container tightly
 
     // Add images to stage
-    this.app.stage.addChild(this.images[0]);
-    this.app.stage.addChild(this.images[1]);
-    this.app.stage.addChild(this.images[2]);
+    // this.app.stage.addChild(this.images[0]);
+    // this.app.stage.addChild(this.images[1]);
+    // this.app.stage.addChild(this.images[2]);
 
     // Enable iamge dragging
-    this.draggify(this.images[0]);
-    this.draggify(this.images[1]);
-    this.draggify(this.images[2]);
+    // this.draggify(this.images[0]);
+    // this.draggify(this.images[1]);
+    // this.draggify(this.images[2]);
+    this.images.forEach(image => {
+      this.app.stage.addChild(image);
+      this.draggify(image);
+    });
 
     // Name images to check later for dragging and zoom bounds
     this.images[0].name = 'image1';
@@ -87,33 +104,50 @@ export default class ThreeHorizontal extends React.Component {
     this.images[0].y = this.state.panel1[1];
     this.images[0].width = this.state.panel1[2] - this.state.panel1[0];
     this.images[0].height = this.state.panel1[3] - this.state.panel1[1];
-    this.images[0].tint = 0xdcdcdc;
+    this.images[0].tint = Math.random() * 0xFFFFFF // 0xdcdcdc;
 
     this.images[1].x = this.state.panel2[0];
     this.images[1].y = this.state.panel2[1];
     this.images[1].width = this.state.panel2[2] - this.state.panel2[0];
     this.images[1].height = this.state.panel2[3] - this.state.panel2[1];
-    this.images[1].tint = 0xc0c0c0;
+    this.images[1].tint = Math.random() * 0xFFFFFF //  0xc0c0c0;
 
     this.images[2].x = this.state.panel3[0];
     this.images[2].y = this.state.panel3[1];
     this.images[2].width = this.state.panel3[2] - this.state.panel3[0];
     this.images[2].height = this.state.panel3[3] - this.state.panel3[1];
-    this.images[2].tint = 0xa9a9a9;
+    this.images[2].tint =  Math.random() * 0xFFFFFF // 0xa9a9a9;
+
+    if (this.props.panelCount > 3) {
+      this.images[3].x = this.state.panel4[0];
+      this.images[3].y = this.state.panel4[1];
+      this.images[3].width = this.state.panel4[2] - this.state.panel4[0];
+      this.images[3].height = this.state.panel4[3] - this.state.panel4[1];
+      this.images[3].tint =  Math.random() * 0xFFFFFF // 0x999999;
+    }
 
     // Add panels for masking
-    this.panels[0].beginFill(0x111111);
-    this.panels[1].beginFill(0x111111);
-    this.panels[2].beginFill(0x111111);
+    // this.panels[0].beginFill(0x111111);
+    // this.panels[1].beginFill(0x111111);
+    // this.panels[2].beginFill(0x111111);
+
+    this.panels.forEach(panel => {
+      panel.beginFill(Math.random() * 0xffffff);
+      panel.drawRect(...this.state.panel1);
+    });
 
     // Use initial state to construct the panels
-    this.panels[0].drawRect(...this.state.panel1);
-    this.panels[1].drawRect(...this.state.panel1);
-    this.panels[2].drawRect(...this.state.panel1);
+    // this.panels[0].drawRect(...this.state.panel1);
+    // this.panels[1].drawRect(...this.state.panel1);
+    // this.panels[2].drawRect(...this.state.panel1);
 
     // Offset initial panels instead of drawing them offsetted (is that a word?)
     this.panels[1].x = Math.round(this.state.width * this.state.section1);
     this.panels[2].x = Math.round(this.state.width * this.state.section2);
+
+    if (this.props.panelCount > 3) {
+      this.panels[3].x = Math.round(this.state.width * this.state.section3);
+    }
 
     // Add panels to stage
     this.panels.forEach(panel => {
@@ -444,6 +478,7 @@ export default class ThreeHorizontal extends React.Component {
     if (this.panels[0].containsPoint(point)) return 0;
     if (this.panels[1].containsPoint(point)) return 1;
     if (this.panels[2].containsPoint(point)) return 2;
+    if (this.panels[3].containsPoint(point)) return 3;
   };
 
   render() {
@@ -542,8 +577,9 @@ export default class ThreeHorizontal extends React.Component {
   }
 } // End component
 
-ThreeHorizontal.defaultProps = {
+MultipleHorizontal.defaultProps = {
   builderWidth: 800,
   builderHeight: 600,
-  maxZoom: 250
+  maxZoom: 250,
+  panelCount: 3
 };
