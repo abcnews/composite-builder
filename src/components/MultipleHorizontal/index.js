@@ -84,15 +84,8 @@ export default class MultipleHorizontal extends React.Component {
     this.composer.appendChild(this.app.view); // Attach PIXI app
     this.composer.style.width = this.state.width + 'px'; // Wrap container tightly
 
-    // Add images to stage
-    // this.app.stage.addChild(this.images[0]);
-    // this.app.stage.addChild(this.images[1]);
-    // this.app.stage.addChild(this.images[2]);
-
-    // Enable iamge dragging
-    // this.draggify(this.images[0]);
-    // this.draggify(this.images[1]);
-    // this.draggify(this.images[2]);
+    // Add images to stage and 
+    // enable iamge dragging
     this.images.forEach(image => {
       this.app.stage.addChild(image);
       this.draggify(image);
@@ -131,19 +124,10 @@ export default class MultipleHorizontal extends React.Component {
     }
 
     // Add panels for masking
-    // this.panels[0].beginFill(0x111111);
-    // this.panels[1].beginFill(0x111111);
-    // this.panels[2].beginFill(0x111111);
-
     this.panels.forEach(panel => {
       panel.beginFill(Math.random() * 0xffffff);
       panel.drawRect(...this.state.panel1);
     });
-
-    // Use initial state to construct the panels
-    // this.panels[0].drawRect(...this.state.panel1);
-    // this.panels[1].drawRect(...this.state.panel1);
-    // this.panels[2].drawRect(...this.state.panel1);
 
     // Offset initial panels instead of drawing them offsetted (is that a word?)
     this.panels[1].x = Math.round(this.state.width * this.state.section1);
