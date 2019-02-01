@@ -4,6 +4,7 @@ const styles = require('./styles.scss');
 // Import images
 const twoImage = require('./images/two-image.jpg');
 const threeHorizontal = require('./images/three-horizontal.jpg');
+const fourHorizontal = require('./images/four-horizontal.jpg');
 const twoDiagonal = require('./images/two-diagonal.jpg');
 const twoDiagonalRight = require('./images/two-diagonal-right.jpg');
 const twoVertical = require('./images/two-vertical.jpg');
@@ -24,7 +25,7 @@ export default class LayoutSelect extends React.Component {
             href="#two-horizontal"
             title="Two images side by side"
           >
-            <img width="320" src={twoImage} name={'two-horizontal'} />
+            <img src={twoImage} name={'two-horizontal'} />
           </a>
         </div>
 
@@ -34,7 +35,17 @@ export default class LayoutSelect extends React.Component {
             href="#three-horizontal"
             title="Three images side by side"
           >
-            <img width="320" src={threeHorizontal} name={'three-horizontal'} />
+            <img src={threeHorizontal} name={'three-horizontal'} />
+          </a>
+        </div>
+
+        <div className={styles.layout}>
+          <a
+            onClick={this.handleClick}
+            href="#four-horizontal"
+            title="Four images side by side"
+          >
+            <img src={fourHorizontal} name={'four-horizontal'} />
           </a>
         </div>
 
@@ -44,7 +55,7 @@ export default class LayoutSelect extends React.Component {
             href="#two-diagonal"
             title="Two images split diagonally from top right to bottom left"
           >
-            <img width="320" src={twoDiagonal} name={'two-diagonal'} />
+            <img src={twoDiagonal} name={'two-diagonal'} />
           </a>
         </div>
 
@@ -54,11 +65,7 @@ export default class LayoutSelect extends React.Component {
             href="#two-diagonal-right"
             title="Two images split diagonally from top left to bottom right"
           >
-            <img
-              width="320"
-              src={twoDiagonalRight}
-              name={'two-diagonal-right'}
-            />
+            <img src={twoDiagonalRight} name={'two-diagonal-right'} />
           </a>
         </div>
 
@@ -68,7 +75,7 @@ export default class LayoutSelect extends React.Component {
             href="#two-diagonal-right"
             title="Two images split horizontally"
           >
-            <img width="320" src={twoVertical} name={'two-vertical'} />
+            <img src={twoVertical} name={'two-vertical'} />
           </a>
         </div>
 
